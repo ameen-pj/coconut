@@ -4,6 +4,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.HashMap;
+
 import com.apj.projects.coconut.utils.SpecialCharacters;
 
 public class HttpRequestParser {
@@ -24,7 +26,34 @@ public class HttpRequestParser {
 	}
 	
 	
-	private void parseHeaderFields(HttpRequest request) {	
+	private void parseHeaderFields(HttpRequest request) {
+		
+		HashMap<String, String> headerFields = new HashMap<String, String>();
+		
+		int _byte;
+		StringBuilder line = new StringBuilder();
+		try {
+			while ((_byte = reader.read()) != -1) {				
+				if ((_byte) == SpecialCharacters.CR && (reader.read() == SpecialCharacters.NL)) {
+					// if empty line.. headers ended
+					if (line.toString().length() == 0) {
+						request.setHeaderFields(headerFields);
+						break;
+					}
+					else {
+						String[] headerLine = line.toString().split(": ");
+						headerFields.put(headerLine[0], headerLine[1]);
+						line.delete(0, line.length());
+					}
+				} else {
+					line.append((char)_byte);
+				}				
+				
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
 	}
 	
 	private void parseRequestLine(HttpRequest request) {

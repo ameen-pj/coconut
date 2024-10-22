@@ -3,6 +3,8 @@ package com.apj.projects.coconut.core;
 import java.net.ServerSocket;
 import java.net.Socket;
 
+import com.apj.projects.coconut.http.HttpRequestParser;
+
 
 public class Server {
 	
@@ -23,6 +25,8 @@ public class Server {
 		while (true) {
 			try {
 				Socket socket = serverSocket.accept();
+				
+				new HttpRequestParser(socket.getInputStream());
 				
 				if (!socket.isClosed()) {
 					socket.close();
