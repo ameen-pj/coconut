@@ -1,49 +1,51 @@
 package com.apj.projects.coconut.http;
 
-import java.util.HashMap;
+import java.io.IOException;
+import java.io.InputStream;
+
+import rawhttp.core.RawHttp;
+import rawhttp.core.RawHttpRequest;
+import rawhttp.core.body.BodyReader;
+import rawhttp.core.errors.InvalidHttpRequest;
 
 public class HttpRequest {
-	
-	private String method;
-	private String URL;
-	private String httpVersion;
-	private HashMap<String,String> headerFields;
-	
-	public HttpRequest() {
+
+	private RawHttpRequest request;
+	private static RawHttp http = new RawHttp();
+
+	public HttpRequest(InputStream in) {
+
+		try {
+			request = http.parseRequest(in);
+		} catch (IOException | InvalidHttpRequest e) {
+			e.printStackTrace();
+			System.out.println(e.getMessage());
+		}
 	}
-	
-	public void setMethod(String method) {
-		this.method = method;
-	}
-	
-	public void setURL(String URL) {
-		this.URL = URL;
-	}
-	
-	public void setHttpVersion(String httpVersion) {
-		this.httpVersion = httpVersion;
-	}
-	
-	public void setHeaderFields(HashMap<String, String> headerFields) {
-		this.headerFields = headerFields;
-	}
-	
-	
+
 	public String getMethod() {
-		return method;
+		return request.getMethod();
 	}
-	
-	public String getURL() {
-		return URL;
+
+	public String getURI() {
+		return request.getUri().toString();
 	}
-	
-	public String getHttpVersion() {
-		return httpVersion;
+
+	public String getBody() {
+
+		try {
+			return request.eagerly().getBody().map(BodyReader::toString).orElse(null);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+		return null;
 	}
-	
-	public HashMap<String,String> getHeaderFields() {
-		return headerFields;
+
+	public String toString() {
+
+		return "[" + request.getMethod() + "]" + " :: " + request.getUri();
+
 	}
-	
-	
+
 }
