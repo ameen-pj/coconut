@@ -26,11 +26,14 @@ public class Server {
 //				HttpRequest req = new HttpRequest(socket.getInputStream());
 //				BufferedOutputStream out = new BufferedOutputStream(socket.getOutputStream());
 //				HttpResponse resp = new HttpResponse(out);
+//
+//				resp.setStatus(HTTPStatusCodes.OK);
+//				resp.setContentType(HTTPContentTypes.TEXT_XML);
+//				resp.sendFile("pom.xml");
 
 				if (!socket.isClosed()) {
 					socket.close();
 				}
-
 			} catch (Exception e) {
 				e.printStackTrace();
 			}

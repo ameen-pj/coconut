@@ -2,6 +2,7 @@ package com.apj.projects.coconut.http;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
 
 import rawhttp.core.RawHttp;
 import rawhttp.core.RawHttpRequest;
@@ -27,8 +28,8 @@ public class HttpRequest {
 		return request.getMethod();
 	}
 
-	public String getURI() {
-		return request.getUri().toString();
+	public URI getURI() {
+		return request.getUri();
 	}
 
 	public String getBody() {

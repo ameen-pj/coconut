@@ -8,6 +8,9 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.HashMap;
 
+import com.apj.projects.coconut.utils.HTTPContentTypes;
+import com.apj.projects.coconut.utils.HTTPStatusCodes;
+
 public class HttpResponse {
 
 	private OutputStream out;
@@ -24,8 +27,12 @@ public class HttpResponse {
 		headers = new StringBuilder();
 	}
 
-	public void setStatus(int statusCode, String statusMsg) {
-		requestLine = "HTTP/1.1 " + statusCode + " " + statusMsg + "\r\n";
+	public void setStatus(HTTPStatusCodes statusCode) {
+		requestLine = "HTTP/1.1 " + statusCode.getStatusCode() + " " + statusCode.getMsg() + "\r\n";
+	}
+
+	public void setContentType(HTTPContentTypes contentType) {
+		setHeader("Content-Type", contentType.getName());
 	}
 
 	public <T> void setHeaders(HashMap<String, T> map) {
