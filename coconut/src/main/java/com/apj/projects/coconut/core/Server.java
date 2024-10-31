@@ -23,13 +23,10 @@ public class Server {
 			try {
 				Socket socket = serverSocket.accept();
 
-//				HttpRequest req = new HttpRequest(socket.getInputStream());
-//				BufferedOutputStream out = new BufferedOutputStream(socket.getOutputStream());
-//				HttpResponse resp = new HttpResponse(out);
+//				HttpRequest request = new HttpRequest(socket.getInputStream());
+//				HttpResponse response = new HttpResponse(socket.getOutputStream());
 //
-//				resp.setStatus(HTTPStatusCodes.OK);
-//				resp.setContentType(HTTPContentTypes.TEXT_XML);
-//				resp.sendFile("pom.xml");
+//				response.sendFile("book.pdf", HTTPStatusCodes.OK);
 
 				if (!socket.isClosed()) {
 					socket.close();

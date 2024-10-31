@@ -1,4 +1,4 @@
-package com.apj.projects.coconut.utils;
+package com.apj.projects.coconut.http;
 
 public enum HTTPStatusCodes {
 

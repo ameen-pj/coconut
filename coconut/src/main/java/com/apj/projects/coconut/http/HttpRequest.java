@@ -1,8 +1,10 @@
 package com.apj.projects.coconut.http;
 
+import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URI;
+
+import com.apj.projects.coconut.utils.URLPath;
 
 import rawhttp.core.RawHttp;
 import rawhttp.core.RawHttpRequest;
@@ -11,13 +13,15 @@ import rawhttp.core.errors.InvalidHttpRequest;
 
 public class HttpRequest {
 
+	private URLPath urlPath;
 	private RawHttpRequest request;
 	private static RawHttp http = new RawHttp();
 
 	public HttpRequest(InputStream in) {
 
 		try {
-			request = http.parseRequest(in);
+			request = http.parseRequest(new BufferedInputStream(in));
+			urlPath = new URLPath(request.getUri().getPath());
 		} catch (IOException | InvalidHttpRequest e) {
 			e.printStackTrace();
 			System.out.println(e.getMessage());
@@ -28,8 +32,8 @@ public class HttpRequest {
 		return request.getMethod();
 	}
 
-	public URI getURI() {
-		return request.getUri();
+	public URLPath getURLPath() {
+		return urlPath;
 	}
 
 	public String getBody() {
