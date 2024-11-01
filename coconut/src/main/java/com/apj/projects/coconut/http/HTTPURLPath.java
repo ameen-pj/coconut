@@ -1,16 +1,16 @@
-package com.apj.projects.coconut.utils;
+package com.apj.projects.coconut.http;
 
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class URLPath {
+public class HTTPURLPath {
 
 	private String pathString;
 	private String[] pathParts;
 
-	public URLPath(String url) {
+	public HTTPURLPath(String url) {
 		this.pathString = url;
 		this.pathParts = url.substring(url.indexOf("/") + 1).split("/");
 	}
@@ -23,11 +23,11 @@ public class URLPath {
 		return pathString;
 	}
 
-	public boolean equals(URLPath path) {
+	public boolean equals(HTTPURLPath path) {
 		return Arrays.equals(pathParts, path.getPathParts());
 	}
 
-	public boolean isParentPathOf(URLPath childPath) {
+	public boolean isParentPathOf(HTTPURLPath childPath) {
 
 		return childPath.getPathString().indexOf(this.getPathString()) == 0;
 

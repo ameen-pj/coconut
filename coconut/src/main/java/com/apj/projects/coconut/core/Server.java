@@ -1,39 +1,24 @@
 package com.apj.projects.coconut.core;
 
-import java.net.ServerSocket;
-import java.net.Socket;
-
 public class Server {
 
-	public Server() {
-		System.out.println("[INFO]: Initializing server ...");
+	private Server() {
 
-		ServerSocket serverSocket = ServerManager.getSocket();
-		listenForConnections(serverSocket);
+		System.out.println("====Coconut====");
 
-		ServerManager.closeSocket();
+		try {
+
+			ServerSocketManager.openServerSocket();
+			ServerSocketManager.listenForConnections();
+		} catch (Exception e) {
+			System.err.println("[ERROR]: " + e.getMessage());
+		} finally {
+			ServerSocketManager.closeServerSocket();
+		}
 
 	}
 
-	private void listenForConnections(ServerSocket serverSocket) {
-
-		System.out.println("[INFO]: Listening for Connections ...");
-
-		while (true) {
-			try {
-				Socket socket = serverSocket.accept();
-
-//				HttpRequest request = new HttpRequest(socket.getInputStream());
-//				HttpResponse response = new HttpResponse(socket.getOutputStream());
-//
-//				response.sendFile("book.pdf", HTTPStatusCodes.OK);
-
-				if (!socket.isClosed()) {
-					socket.close();
-				}
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		}
+	public static void start() {
+		new Server();
 	}
 }
