@@ -1,4 +1,4 @@
-package com.apj.projects.coconut.core;
+package com.apj.projects.coconut.server;
 
 public class Server {
 
@@ -11,6 +11,7 @@ public class Server {
 			ServerSocketManager.openServerSocket();
 			ServerSocketManager.listenForConnections();
 		} catch (Exception e) {
+			e.printStackTrace();
 			System.err.println("[ERROR]: " + e.getMessage());
 		} finally {
 			ServerSocketManager.closeServerSocket();

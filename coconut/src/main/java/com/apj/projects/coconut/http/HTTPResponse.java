@@ -1,6 +1,8 @@
 package com.apj.projects.coconut.http;
 
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Optional;
 
 import com.apj.projects.coconut.http.enums.HTTPContentTypes;
@@ -10,7 +12,7 @@ public class HTTPResponse {
 
 	private String HTTPVersion;
 	private HTTPStatusCode httpStatusCode;
-	private HashMap<String, String> headers = new HashMap<>();
+	private HashMap<String, List<String>> headers = new HashMap<>();
 	private Optional<?> body;
 
 	// Setters
@@ -24,19 +26,19 @@ public class HTTPResponse {
 	}
 
 	public void setContentType(HTTPContentTypes contentType) {
-		this.headers.put("Content-Type", contentType.getName());
+		this.headers.put("Content-Type", Arrays.asList(contentType.getName()));
 	}
 
 	public void setContentLength(long contentLength) {
-		this.headers.put("Content-Length", Long.toString(contentLength));
+		this.headers.put("Content-Length", Arrays.asList(Long.toString(contentLength)));
 	}
 
-	public void setHeaders(HashMap<String, String> headers) {
+	public void setHeaders(HashMap<String, List<String>> headers) {
 		this.headers = headers;
 	}
 
 	public <T> void setHeader(String key, String value) {
-		headers.put(key, value);
+		headers.put(key, Arrays.asList(value));
 	}
 
 	public <T> void setBody(T body) {
@@ -53,7 +55,7 @@ public class HTTPResponse {
 		return this.httpStatusCode;
 	}
 
-	public HashMap<String, String> getHeaders() {
+	public HashMap<String, List<String>> getHeaders() {
 		return this.headers;
 	}
 

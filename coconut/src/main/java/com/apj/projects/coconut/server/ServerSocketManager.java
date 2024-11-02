@@ -1,8 +1,6 @@
-package com.apj.projects.coconut.core;
+package com.apj.projects.coconut.server;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 
@@ -31,17 +29,12 @@ public class ServerSocketManager {
 
 			try {
 				Socket socket = serverSocket.accept();
-
-				InputStream in = socket.getInputStream();
-				OutputStream out = socket.getOutputStream();
-
 				if (!socket.isClosed()) {
 					socket.close();
 				}
 
 			} catch (IOException e) {
 				System.err.println("[ERROR]: " + e.getMessage());
-			} finally {
 			}
 
 		}

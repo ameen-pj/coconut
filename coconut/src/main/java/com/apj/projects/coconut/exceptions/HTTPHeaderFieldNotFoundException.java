@@ -1,6 +1,6 @@
 package com.apj.projects.coconut.exceptions;
 
-public class HTTPHeaderFieldNotFoundException extends Exception {
+public class HTTPHeaderFieldNotFoundException extends RuntimeException {
 
 	private static final long serialVersionUID = 2839643963229370577L;
 

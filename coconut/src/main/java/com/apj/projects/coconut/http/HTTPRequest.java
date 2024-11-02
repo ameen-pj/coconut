@@ -1,6 +1,7 @@
 package com.apj.projects.coconut.http;
 
-import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import com.apj.projects.coconut.exceptions.HTTPHeaderFieldNotFoundException;
@@ -11,7 +12,7 @@ public class HTTPRequest {
 	private String HTTPVersion;
 	private HTTPRequestMethod HTTPRequestMethod;
 	private HTTPURLPath HTTPURLPath;
-	private HashMap<String, String> headers;
+	private Map<String, List<String>> headers;
 	private Optional<?> body;
 
 	// Setters
@@ -28,7 +29,7 @@ public class HTTPRequest {
 		this.HTTPURLPath = path;
 	}
 
-	public void setHeaders(HashMap<String, String> headers) {
+	public void setHeaders(Map<String, List<String>> headers) {
 		this.headers = headers;
 	}
 
@@ -50,13 +51,13 @@ public class HTTPRequest {
 		return this.HTTPURLPath;
 	}
 
-	public HashMap<String, ?> getHeaders() {
+	public Map<String, ?> getHeaders() {
 		return this.headers;
 	}
 
-	public String getHeaderByField(String field) throws HTTPHeaderFieldNotFoundException {
+	public List<String> getHeaderByField(String field) throws HTTPHeaderFieldNotFoundException {
 
-		String val = (String) headers.get(field);
+		List<String> val = headers.get(field);
 		if (val == null) {
 			throw new HTTPHeaderFieldNotFoundException();
 		}
