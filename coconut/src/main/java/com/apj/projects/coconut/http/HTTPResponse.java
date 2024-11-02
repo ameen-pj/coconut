@@ -1,9 +1,9 @@
 package com.apj.projects.coconut.http;
 
+import java.io.File;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Optional;
 
 import com.apj.projects.coconut.http.enums.HTTPContentTypes;
 import com.apj.projects.coconut.http.enums.HTTPStatusCode;
@@ -13,7 +13,7 @@ public class HTTPResponse {
 	private String HTTPVersion;
 	private HTTPStatusCode httpStatusCode;
 	private HashMap<String, List<String>> headers = new HashMap<>();
-	private Optional<?> body = Optional.ofNullable(null);
+	private HTTPBody body;
 
 	// Setters
 
@@ -37,12 +37,24 @@ public class HTTPResponse {
 		this.headers = headers;
 	}
 
-	public <T> void setHeader(String key, String value) {
+	public void setHeader(String key, String value) {
 		headers.put(key, Arrays.asList(value));
 	}
 
-	public <T> void setBody(T body) {
-		this.body = Optional.ofNullable(body);
+	public void setBody(HTTPBody httpBody) {
+		this.body = httpBody;
+
+		if (httpBody.isMediaType()) {
+			for (HTTPContentTypes t : HTTPContentTypes.values()) {
+				if (((File) httpBody.getContent().get()).getName().contains(t.getExtension())) {
+					setContentType(t);
+					break;
+				}
+			}
+		} else {
+			setContentType(HTTPContentTypes.TEXT_PLAIN);
+		}
+
 	}
 
 	// Getters
@@ -59,7 +71,7 @@ public class HTTPResponse {
 		return this.headers;
 	}
 
-	public Optional<?> getBody() {
+	public HTTPBody getBody() {
 		return this.body;
 	}
 

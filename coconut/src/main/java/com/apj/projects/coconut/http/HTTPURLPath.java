@@ -37,7 +37,7 @@ public class HTTPURLPath {
 
 		HashMap<String, String> params = new HashMap<>();
 
-		String[] urlExpressionParts = urlExpression.split("/");
+		String[] urlExpressionParts = urlExpression.substring(urlExpression.indexOf("/") + 1).split("/");
 		for (int i = 0; i < urlExpressionParts.length; i++) {
 
 			Pattern pattern = Pattern.compile("\\{(.*?)\\}");

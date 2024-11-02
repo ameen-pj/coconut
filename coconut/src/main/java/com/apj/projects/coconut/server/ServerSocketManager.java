@@ -1,8 +1,16 @@
 package com.apj.projects.coconut.server;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+
+import com.apj.projects.coconut.http.HTTPBody;
+import com.apj.projects.coconut.http.HTTPRequest;
+import com.apj.projects.coconut.http.HTTPRequestParser;
+import com.apj.projects.coconut.http.HTTPResponse;
+import com.apj.projects.coconut.http.HTTPResponseWriter;
+import com.apj.projects.coconut.http.enums.HTTPStatusCode;
 
 // Singleton Socket object
 public class ServerSocketManager {
@@ -29,6 +37,18 @@ public class ServerSocketManager {
 
 			try {
 				Socket socket = serverSocket.accept();
+
+				HTTPRequest req = new HTTPRequestParser(socket.getInputStream()).parse();
+				if (req != null) {
+
+					HTTPResponse resp = new HTTPResponse();
+					resp.setHTTPVersion("HTTP/1.1");
+					resp.setStatus(HTTPStatusCode.OK);
+					resp.setBody(new HTTPBody((new File(req.getHTTPURLPath().getParams("/{file}").get("file")))));
+					HTTPResponseWriter writer = new HTTPResponseWriter(socket.getOutputStream(), resp);
+					writer.buildResponse();
+					writer.send();
+				}
 
 				if (!socket.isClosed()) {
 					socket.close();

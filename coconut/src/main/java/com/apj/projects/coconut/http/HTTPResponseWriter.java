@@ -1,6 +1,8 @@
 package com.apj.projects.coconut.http;
 
 import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.List;
@@ -8,6 +10,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import com.apj.projects.coconut.exceptions.BadHTTPRequestException;
+import com.apj.projects.coconut.utils.FileSender;
 
 public class HTTPResponseWriter {
 
@@ -46,17 +49,30 @@ public class HTTPResponseWriter {
 		}
 
 		responseString.append("\r\n");
-
-		Optional<?> body = response.getBody();
-		if (body.isPresent()) {
-			responseString.append(body.get());
-		}
-
 	}
 
 	public void send() {
 		try {
-			out.write(responseString.toString().getBytes());
+			out.write(responseString.toString().getBytes()); // Headers
+
+			Optional<?> body = response.getBody().getContent();
+			if (!response.getBody().isMediaType() && body.isPresent()) {
+				out.write(body.get().toString().getBytes());
+			}
+
+			if (body.isPresent() && response.getBody().isMediaType()) {
+				try {
+					FileSender sender = new FileSender((File) body.get());
+					sender.ready();
+					sender.copyTo(out);
+				} catch (FileNotFoundException e) {
+					FileSender sender = new FileSender(new File("pages/404.html"));
+					sender.ready();
+					sender.copyTo(out);
+				}
+
+			}
+
 			out.flush();
 		} catch (IOException e) {
 			e.printStackTrace();

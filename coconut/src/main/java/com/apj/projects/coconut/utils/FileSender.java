@@ -12,8 +12,8 @@ public class FileSender {
 	private File file;
 	private BufferedInputStream in;
 
-	public FileSender(String fileName) {
-		this.file = new File(fileName);
+	public FileSender(File file) {
+		this.file = file;
 	}
 
 	public long getFileSize() {
