@@ -13,7 +13,7 @@ public class HTTPResponse {
 	private String HTTPVersion;
 	private HTTPStatusCode httpStatusCode;
 	private HashMap<String, List<String>> headers = new HashMap<>();
-	private Optional<?> body;
+	private Optional<?> body = Optional.ofNullable(null);
 
 	// Setters
 

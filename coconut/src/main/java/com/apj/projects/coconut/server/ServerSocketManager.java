@@ -29,6 +29,7 @@ public class ServerSocketManager {
 
 			try {
 				Socket socket = serverSocket.accept();
+
 				if (!socket.isClosed()) {
 					socket.close();
 				}
@@ -36,9 +37,7 @@ public class ServerSocketManager {
 			} catch (IOException e) {
 				System.err.println("[ERROR]: " + e.getMessage());
 			}
-
 		}
-
 	}
 
 	public static void closeServerSocket() {
