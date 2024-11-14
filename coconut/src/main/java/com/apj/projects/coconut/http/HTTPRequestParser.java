@@ -4,7 +4,10 @@ import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
+import com.apj.projects.coconut.exceptions.BadHTTPRequestException;
+import com.apj.projects.coconut.exceptions.HTTPRequestParsingException;
 import com.apj.projects.coconut.http.enums.HTTPRequestMethod;
+import com.apj.projects.coconut.http.enums.HTTPVersion;
 
 import rawhttp.core.RawHttp;
 import rawhttp.core.RawHttpRequest;
@@ -23,12 +26,12 @@ public class HTTPRequestParser {
 		this.in = new BufferedInputStream(in);
 	}
 
-	public HTTPRequest parse() {
+	public HTTPRequest parse() throws BadHTTPRequestException, HTTPRequestParsingException {
+
 		try {
 			this.rawRequest = rawHttp.parseRequest(in);
 			this.request = new HTTPRequest();
-
-			request.setHTTPVersion("HTTP/1.1");
+			request.setHTTPVersion(HTTPVersion.HTTP_1_1);
 			request.setHTTPRequestMethod(HTTPRequestMethod.valueOf(rawRequest.getMethod()));
 			request.setHTTPURLPath(new HTTPURLPath(rawRequest.getUri().getPath()));
 			request.setHeaders(rawRequest.getHeaders().asMap());
@@ -37,12 +40,10 @@ public class HTTPRequestParser {
 			return request;
 
 		} catch (IOException e) {
-			e.printStackTrace();
+			throw new HTTPRequestParsingException(e.getMessage());
 		} catch (InvalidHttpRequest e) {
-			System.err.println("[ERROR]: Invalid HTTP request: " + e.getMessage());
+			throw new BadHTTPRequestException(e.getMessage());
 		}
-
-		return null;
 	}
 
 }

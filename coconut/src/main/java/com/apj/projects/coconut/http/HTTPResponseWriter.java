@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import com.apj.projects.coconut.exceptions.BadHTTPRequestException;
 import com.apj.projects.coconut.utils.FileSender;
 
 public class HTTPResponseWriter {
@@ -19,20 +18,19 @@ public class HTTPResponseWriter {
 	private StringBuilder responseString;
 	private BufferedOutputStream out;
 
-	public HTTPResponseWriter(OutputStream out, HTTPResponse response) {
+	public HTTPResponseWriter(OutputStream out) {
 
 		this.out = new BufferedOutputStream(out);
-		this.response = response;
 		this.responseString = new StringBuilder();
 	}
 
-	public void buildResponse() throws BadHTTPRequestException {
+	public void buildResponse(HTTPResponse response) {
+
+		this.response = response;
 
 		if (response.getHTTPVersion() != null && response.getStatus() != null) {
 			responseString.append(response.getHTTPVersion() + " " + response.getStatus().getCode() + " "
 					+ response.getStatus().getMsg() + "\r\n");
-		} else {
-			throw new BadHTTPRequestException("Invalid request line");
 		}
 
 		Map<String, List<String>> headers = response.getHeaders();
@@ -55,22 +53,27 @@ public class HTTPResponseWriter {
 		try {
 			out.write(responseString.toString().getBytes()); // Headers
 
-			Optional<?> body = response.getBody().getContent();
-			if (!response.getBody().isMediaType() && body.isPresent()) {
-				out.write(body.get().toString().getBytes());
-			}
+			HTTPBody body = response.getBody();
+			if (body != null) {
 
-			if (body.isPresent() && response.getBody().isMediaType()) {
-				try {
-					FileSender sender = new FileSender((File) body.get());
-					sender.ready();
-					sender.copyTo(out);
-				} catch (FileNotFoundException e) {
-					FileSender sender = new FileSender(new File("pages/404.html"));
-					sender.ready();
-					sender.copyTo(out);
+				Optional<?> bodyContent = body.getContent();
+
+				if (!response.getBody().isMediaType() && bodyContent.isPresent()) {
+					out.write(bodyContent.get().toString().getBytes());
 				}
 
+				if (bodyContent.isPresent() && response.getBody().isMediaType()) {
+					try {
+						FileSender sender = new FileSender((File) bodyContent.get());
+						sender.ready();
+						sender.copyTo(out);
+					} catch (FileNotFoundException e) {
+						FileSender sender = new FileSender(new File("pages/404.html"));
+						sender.ready();
+						sender.copyTo(out);
+					}
+
+				}
 			}
 
 			out.flush();

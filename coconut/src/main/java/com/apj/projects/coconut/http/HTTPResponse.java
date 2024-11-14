@@ -7,6 +7,7 @@ import java.util.List;
 
 import com.apj.projects.coconut.http.enums.HTTPContentTypes;
 import com.apj.projects.coconut.http.enums.HTTPStatusCode;
+import com.apj.projects.coconut.http.enums.HTTPVersion;
 
 public class HTTPResponse {
 
@@ -17,31 +18,37 @@ public class HTTPResponse {
 
 	// Setters
 
-	public void setHTTPVersion(String version) {
-		this.HTTPVersion = version;
+	public HTTPResponse setHTTPVersion(HTTPVersion version) {
+		this.HTTPVersion = version.getVersion();
+		return this;
 	}
 
-	public void setStatus(HTTPStatusCode statusCode) {
+	public HTTPResponse setStatus(HTTPStatusCode statusCode) {
 		this.httpStatusCode = statusCode;
+		return this;
 	}
 
-	public void setContentType(HTTPContentTypes contentType) {
+	public HTTPResponse setContentType(HTTPContentTypes contentType) {
 		this.headers.put("Content-Type", Arrays.asList(contentType.getName()));
+		return this;
 	}
 
-	public void setContentLength(long contentLength) {
+	public HTTPResponse setContentLength(long contentLength) {
 		this.headers.put("Content-Length", Arrays.asList(Long.toString(contentLength)));
+		return this;
 	}
 
-	public void setHeaders(HashMap<String, List<String>> headers) {
+	public HTTPResponse setHeaders(HashMap<String, List<String>> headers) {
 		this.headers = headers;
+		return this;
 	}
 
-	public void setHeader(String key, String value) {
+	public HTTPResponse setHeader(String key, String value) {
 		headers.put(key, Arrays.asList(value));
+		return this;
 	}
 
-	public void setBody(HTTPBody httpBody) {
+	public HTTPResponse setBody(HTTPBody httpBody) {
 		this.body = httpBody;
 
 		if (httpBody.isMediaType()) {
@@ -54,7 +61,7 @@ public class HTTPResponse {
 		} else {
 			setContentType(HTTPContentTypes.TEXT_PLAIN);
 		}
-
+		return this;
 	}
 
 	// Getters

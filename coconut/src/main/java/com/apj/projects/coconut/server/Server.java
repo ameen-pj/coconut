@@ -7,7 +7,6 @@ public class Server {
 		System.out.println("====Coconut====");
 
 		try {
-
 			ServerSocketManager.openServerSocket();
 			ServerSocketManager.listenForConnections();
 		} catch (Exception e) {

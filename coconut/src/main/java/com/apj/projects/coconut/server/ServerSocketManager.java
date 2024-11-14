@@ -1,16 +1,12 @@
 package com.apj.projects.coconut.server;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 
-import com.apj.projects.coconut.http.HTTPBody;
-import com.apj.projects.coconut.http.HTTPRequest;
-import com.apj.projects.coconut.http.HTTPRequestParser;
-import com.apj.projects.coconut.http.HTTPResponse;
-import com.apj.projects.coconut.http.HTTPResponseWriter;
-import com.apj.projects.coconut.http.enums.HTTPStatusCode;
+import com.apj.projects.coconut.concurent.ThreadpoolService;
+import com.apj.projects.coconut.exceptions.ThreadpoolServiceException;
+import com.apj.projects.coconut.resource.handlers.RequestHandler;
 
 // Singleton Socket object
 public class ServerSocketManager {
@@ -32,26 +28,21 @@ public class ServerSocketManager {
 	public static void listenForConnections() {
 
 		System.out.println("[INFO]: Listening for connections ...");
+		ThreadpoolService threadpoolService = ThreadpoolService.getThreadPoolService();
 
 		while (true) {
 
 			try {
 				Socket socket = serverSocket.accept();
 
-				HTTPRequest req = new HTTPRequestParser(socket.getInputStream()).parse();
-				if (req != null) {
+				RequestHandler reqHandler = new RequestHandler(socket, socket.getInputStream(),
+						socket.getOutputStream());
 
-					HTTPResponse resp = new HTTPResponse();
-					resp.setHTTPVersion("HTTP/1.1");
-					resp.setStatus(HTTPStatusCode.OK);
-					resp.setBody(new HTTPBody((new File(req.getHTTPURLPath().getParams("/{file}").get("file")))));
-					HTTPResponseWriter writer = new HTTPResponseWriter(socket.getOutputStream(), resp);
-					writer.buildResponse();
-					writer.send();
-				}
-
-				if (!socket.isClosed()) {
-					socket.close();
+				// Handles the request and closes the socket
+				try {
+					threadpoolService.execute(reqHandler);
+				} catch (ThreadpoolServiceException e) {
+					System.err.println("[ERROR]: " + e.getMessage());
 				}
 
 			} catch (IOException e) {

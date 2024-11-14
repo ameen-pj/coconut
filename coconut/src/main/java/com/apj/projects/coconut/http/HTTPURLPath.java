@@ -44,7 +44,10 @@ public class HTTPURLPath {
 			Matcher matcher = pattern.matcher(urlExpressionParts[i]);
 
 			while (matcher.find()) {
-				params.put(matcher.group(1), pathParts[i]);
+				if (i < pathParts.length) {
+					params.put(matcher.group(1), pathParts[i]);
+				}
+
 			}
 		}
 		return params;

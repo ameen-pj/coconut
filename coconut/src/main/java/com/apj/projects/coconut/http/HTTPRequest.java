@@ -6,6 +6,7 @@ import java.util.Optional;
 
 import com.apj.projects.coconut.exceptions.HTTPHeaderFieldNotFoundException;
 import com.apj.projects.coconut.http.enums.HTTPRequestMethod;
+import com.apj.projects.coconut.http.enums.HTTPVersion;
 
 public class HTTPRequest {
 
@@ -17,8 +18,8 @@ public class HTTPRequest {
 
 	// Setters
 
-	public void setHTTPVersion(String version) {
-		this.HTTPVersion = version;
+	public void setHTTPVersion(HTTPVersion version) {
+		this.HTTPVersion = version.getVersion();
 	}
 
 	public void setHTTPRequestMethod(HTTPRequestMethod method) {
