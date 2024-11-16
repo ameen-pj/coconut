@@ -5,7 +5,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 
 import com.apj.projects.coconut.concurent.ThreadpoolService;
-import com.apj.projects.coconut.exceptions.ThreadpoolServiceException;
+import com.apj.projects.coconut.concurent.exceptions.ThreadpoolServiceException;
 import com.apj.projects.coconut.resource.handlers.RequestHandler;
 
 // Singleton Socket object
@@ -31,7 +31,6 @@ public class ServerSocketManager {
 		ThreadpoolService threadpoolService = ThreadpoolService.getThreadPoolService();
 
 		while (true) {
-
 			try {
 				Socket socket = serverSocket.accept();
 

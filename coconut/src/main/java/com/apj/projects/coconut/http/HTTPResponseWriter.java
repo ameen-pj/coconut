@@ -9,6 +9,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import com.apj.projects.coconut.http.exceptions.BadHTTPBodyException;
+import com.apj.projects.coconut.http.exceptions.BadHTTPHeadersException;
+import com.apj.projects.coconut.http.exceptions.BadHTTPResponseException;
+import com.apj.projects.coconut.http.exceptions.HTTPResponseWriterException;
 import com.apj.projects.coconut.utils.FileSender;
 
 public class HTTPResponseWriter {
@@ -19,18 +23,20 @@ public class HTTPResponseWriter {
 	private BufferedOutputStream out;
 
 	public HTTPResponseWriter(OutputStream out) {
-
 		this.out = new BufferedOutputStream(out);
 		this.responseString = new StringBuilder();
 	}
 
-	public void buildResponse(HTTPResponse response) {
+	public void buildResponse(HTTPResponse response) throws BadHTTPResponseException, BadHTTPHeadersException {
 
 		this.response = response;
 
 		if (response.getHTTPVersion() != null && response.getStatus() != null) {
 			responseString.append(response.getHTTPVersion() + " " + response.getStatus().getCode() + " "
 					+ response.getStatus().getMsg() + "\r\n");
+		} else {
+			throw new BadHTTPResponseException(
+					"Cannot build a response with an invalid HTTP version or HTTP status code");
 		}
 
 		Map<String, List<String>> headers = response.getHeaders();
@@ -44,18 +50,19 @@ public class HTTPResponseWriter {
 				responseString.append(values.get(values.size() - 1));
 				responseString.append("\r\n");
 			}
+		} else {
+			throw new BadHTTPHeadersException("Cannot build a response with empty/null headers");
 		}
 
 		responseString.append("\r\n");
 	}
 
-	public void send() {
+	public void send() throws BadHTTPBodyException, HTTPResponseWriterException {
 		try {
 			out.write(responseString.toString().getBytes()); // Headers
-
 			HTTPBody body = response.getBody();
-			if (body != null) {
 
+			if (body != null) {
 				Optional<?> bodyContent = body.getContent();
 
 				if (!response.getBody().isMediaType() && bodyContent.isPresent()) {
@@ -63,22 +70,23 @@ public class HTTPResponseWriter {
 				}
 
 				if (bodyContent.isPresent() && response.getBody().isMediaType()) {
+					File file = (File) bodyContent.get();
 					try {
-						FileSender sender = new FileSender((File) bodyContent.get());
+						FileSender sender = new FileSender(file);
 						sender.ready();
 						sender.copyTo(out);
 					} catch (FileNotFoundException e) {
-						FileSender sender = new FileSender(new File("pages/404.html"));
-						sender.ready();
-						sender.copyTo(out);
+						throw new BadHTTPBodyException("Cannot send the file " + file.getAbsolutePath()
+								+ "as the following resource could not be found");
+					} catch (IOException e) {
+						throw new HTTPResponseWriterException(
+								"Could not write file to outputstream: " + e.getMessage());
 					}
-
 				}
 			}
-
 			out.flush();
 		} catch (IOException e) {
-			e.printStackTrace();
+			throw new HTTPResponseWriterException("Could not flush response to buffered stream: " + e.getMessage());
 		}
 	}
 }

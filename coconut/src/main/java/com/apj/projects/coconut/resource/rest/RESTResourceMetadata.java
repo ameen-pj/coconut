@@ -6,16 +6,16 @@ import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.util.HashMap;
 
-import com.apj.projects.coconut.exceptions.BadRESTResourceException;
-import com.apj.projects.coconut.exceptions.BadRESTResourceMethodException;
 import com.apj.projects.coconut.http.enums.HTTPRequestMethod;
 import com.apj.projects.coconut.resource.rest.annotations.DELETE;
 import com.apj.projects.coconut.resource.rest.annotations.GET;
 import com.apj.projects.coconut.resource.rest.annotations.POST;
 import com.apj.projects.coconut.resource.rest.annotations.PUT;
 import com.apj.projects.coconut.resource.rest.annotations.RESTResourceMapping;
+import com.apj.projects.coconut.resource.rest.exceptions.BadRESTResourceException;
+import com.apj.projects.coconut.resource.rest.exceptions.BadRESTResourceMethodException;
 
-public class RESTResourceManager {
+public class RESTResourceMetadata {
 
 	private Class<?> restEntity;
 	private Class<?> restResourceClass;
@@ -23,7 +23,7 @@ public class RESTResourceManager {
 	private Object restResourceObject;
 	private HashMap<HTTPRequestMethod, Method> requestMethodMap;
 
-	public RESTResourceManager(Class<?> restResource) {
+	public RESTResourceMetadata(Class<?> restResource) {
 
 		try {
 
@@ -99,5 +99,4 @@ public class RESTResourceManager {
 			}
 		}
 	}
-
 }

@@ -4,7 +4,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-import com.apj.projects.coconut.exceptions.ThreadpoolServiceException;
+import com.apj.projects.coconut.concurent.exceptions.ThreadpoolServiceException;
 
 public class ThreadpoolService {
 

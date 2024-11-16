@@ -4,9 +4,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import com.apj.projects.coconut.exceptions.HTTPHeaderFieldNotFoundException;
 import com.apj.projects.coconut.http.enums.HTTPRequestMethod;
 import com.apj.projects.coconut.http.enums.HTTPVersion;
+import com.apj.projects.coconut.http.exceptions.BadHTTPHeadersException;
 
 public class HTTPRequest {
 
@@ -56,11 +56,11 @@ public class HTTPRequest {
 		return this.headers;
 	}
 
-	public List<String> getHeaderByField(String field) throws HTTPHeaderFieldNotFoundException {
+	public List<String> getHeaderByField(String field) throws BadHTTPHeadersException {
 
 		List<String> val = headers.get(field);
 		if (val == null) {
-			throw new HTTPHeaderFieldNotFoundException();
+			throw new BadHTTPHeadersException("Could not get request header field : " + field);
 		}
 		return val;
 

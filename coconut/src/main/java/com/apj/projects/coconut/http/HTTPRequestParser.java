@@ -4,10 +4,10 @@ import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
-import com.apj.projects.coconut.exceptions.BadHTTPRequestException;
-import com.apj.projects.coconut.exceptions.HTTPRequestParsingException;
 import com.apj.projects.coconut.http.enums.HTTPRequestMethod;
 import com.apj.projects.coconut.http.enums.HTTPVersion;
+import com.apj.projects.coconut.http.exceptions.BadHTTPRequestException;
+import com.apj.projects.coconut.http.exceptions.HTTPRequestParsingException;
 
 import rawhttp.core.RawHttp;
 import rawhttp.core.RawHttpRequest;
@@ -36,7 +36,6 @@ public class HTTPRequestParser {
 			request.setHTTPURLPath(new HTTPURLPath(rawRequest.getUri().getPath()));
 			request.setHeaders(rawRequest.getHeaders().asMap());
 			request.setBody(rawRequest.eagerly().getBody().map(BodyReader::toString).orElse(null));
-
 			return request;
 
 		} catch (IOException e) {

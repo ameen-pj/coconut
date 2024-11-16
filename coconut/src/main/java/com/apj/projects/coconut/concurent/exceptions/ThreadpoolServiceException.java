@@ -1,4 +1,4 @@
-package com.apj.projects.coconut.exceptions;
+package com.apj.projects.coconut.concurent.exceptions;
 
 public class ThreadpoolServiceException extends RuntimeException {
 

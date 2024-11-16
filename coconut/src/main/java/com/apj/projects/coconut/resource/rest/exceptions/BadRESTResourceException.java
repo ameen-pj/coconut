@@ -1,4 +1,4 @@
-package com.apj.projects.coconut.exceptions;
+package com.apj.projects.coconut.resource.rest.exceptions;
 
 public class BadRESTResourceException extends RuntimeException {
 

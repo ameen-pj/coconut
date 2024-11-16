@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.apj.projects.coconut.http.exceptions.BadURLException;
+
 public class HTTPURLPath {
 
 	private String pathString;
@@ -31,6 +33,20 @@ public class HTTPURLPath {
 
 		return childPath.getPathString().indexOf(this.getPathString()) == 0;
 
+	}
+
+	public String getResourceType() throws BadURLException {
+		if (pathParts.length > 0) {
+			return pathParts[0];
+		}
+		throw new BadURLException("Cannot extract ResourceType from urlPath: " + pathString);
+	}
+
+	public String getResourceName() throws BadURLException {
+		if (pathParts.length > 1) {
+			return pathParts[1];
+		}
+		throw new BadURLException("Cannot extract ResourceName from urlPath: " + pathString);
 	}
 
 	public HashMap<String, String> getParams(String urlExpression) {
