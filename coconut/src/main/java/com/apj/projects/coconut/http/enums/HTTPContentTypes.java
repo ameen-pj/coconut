@@ -1,4 +1,4 @@
-package com.apj.projects.coconut.http;
+package com.apj.projects.coconut.http.enums;
 
 public enum HTTPContentTypes {
 

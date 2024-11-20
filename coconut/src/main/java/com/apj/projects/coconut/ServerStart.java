@@ -1,13 +1,18 @@
 package com.apj.projects.coconut;
 
-import com.apj.projects.coconut.core.Server;
+import com.apj.projects.coconut.concurent.ThreadpoolService;
+import com.apj.projects.coconut.server.Server;
 
 public class ServerStart {
 	public static void main(String[] args) {
 
-		System.out.println("== Coconut ==");
+		Runtime.getRuntime().addShutdownHook(new Thread() {
+			public void run() {
+				ThreadpoolService.shutdown();
+			}
+		});
 
-		new Server();
+		Server.start();
 
 	}
 }
