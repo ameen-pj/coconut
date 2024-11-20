@@ -1,46 +1,42 @@
 package com.apj.projects.coconut.resource.rest;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.util.HashMap;
 
+import com.apj.projects.coconut.http.HTTPURLPath;
 import com.apj.projects.coconut.http.enums.HTTPRequestMethod;
+import com.apj.projects.coconut.resource.handlers.annotations.Path;
 import com.apj.projects.coconut.resource.rest.annotations.DELETE;
 import com.apj.projects.coconut.resource.rest.annotations.GET;
 import com.apj.projects.coconut.resource.rest.annotations.POST;
 import com.apj.projects.coconut.resource.rest.annotations.PUT;
 import com.apj.projects.coconut.resource.rest.annotations.RESTResourceMapping;
-import com.apj.projects.coconut.resource.rest.exceptions.BadRESTResourceException;
-import com.apj.projects.coconut.resource.rest.exceptions.BadRESTResourceMethodException;
+import com.apj.projects.coconut.resource.rest.exceptions.RestResourceException;
+import com.apj.projects.coconut.resource.rest.exceptions.UnsupportedRestResourceMethodException;
+import com.apj.projects.coconut.util.exceptions.ObjectCreatorException;
+import com.apj.projects.coconut.utils.ObjectCreator;
+import com.apj.projects.coconut.utils.Pair;
 
 public class RESTResourceMetadata {
 
-	private Class<?> restEntity;
 	private Class<?> restResourceClass;
-	private String restResourceName;
+	private Class<?> restEntityClass;
+
 	private Object restResourceObject;
-	private HashMap<HTTPRequestMethod, Method> requestMethodMap;
+	private String restResourceName;
 
-	public RESTResourceMetadata(Class<?> restResource) {
+	private HashMap<Pair<HTTPRequestMethod, HTTPURLPath>, Method> requestMethodMap;
 
-		try {
+	public RESTResourceMetadata(Class<?> restResourceClass) throws RestResourceException {
 
-			requestMethodMap = new HashMap<HTTPRequestMethod, Method>();
+		this.restResourceClass = restResourceClass;
+		this.restEntityClass = ((ParameterizedType) restResourceClass.getGenericSuperclass())
+				.getActualTypeArguments()[0].getClass();
 
-			restEntity = ((ParameterizedType) restResource.getGenericSuperclass()).getActualTypeArguments()[0]
-					.getClass();
-			restResourceClass = restResource;
-			createNewRestResourceObject();
-			setRestResourceName();
-			mapMethodsByRequestType();
-		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
-				| NoSuchMethodException | SecurityException e) {
-			e.printStackTrace();
-			throw new BadRESTResourceException(
-					"Could not instantiate REST Resource class: " + restResource.getCanonicalName());
-		}
+		createResourceObject();
+		mapRequestMethods();
 
 	}
 
@@ -48,55 +44,70 @@ public class RESTResourceMetadata {
 		return restResourceName;
 	}
 
-	public Object getRestResourceObject() {
-		return restResourceObject;
+	public Class<?> getRestResourceClass() {
+		return restResourceClass;
 	}
 
-	public Method getMethodByHTTPRequestMethod(HTTPRequestMethod requestMethod) {
-		return requestMethodMap.get(requestMethod);
+	public Class<?> getRestEntityClass() {
+		return restEntityClass;
 	}
 
-	public void invokeMethodByHTTPRequestMethod(HTTPRequestMethod requestMethod) throws BadRESTResourceMethodException {
+	@SuppressWarnings("unchecked")
+	public RESTResource<? extends Entity> getRestResourceObject() {
+		return (RESTResource<? extends Entity>) restResourceObject;
+	}
 
-		Method method = getMethodByHTTPRequestMethod(requestMethod);
-		if (method != null) {
-			try {
-				method.invoke(getRestResourceObject());
-			} catch (IllegalAccessException | InvocationTargetException e) {
-				throw new BadRESTResourceMethodException("Could not invoke REST method for this request");
-			}
+	public Method getRequestMethodByPair(Pair<HTTPRequestMethod, HTTPURLPath> pair)
+			throws UnsupportedRestResourceMethodException {
+		Method method = requestMethodMap.get(pair);
+		if (method == null) {
+			throw new UnsupportedRestResourceMethodException(
+					pair.getKey() + ":" + pair.getValue().getPathString() + " not implemented");
+		}
+		return method;
+	}
+
+	private void createResourceObject() throws RestResourceException {
+		// Initializing restResource object
+		try {
+			restResourceObject = new ObjectCreator(restResourceClass);
+			// Setting name
+			String name = restResourceClass.getAnnotation(RESTResourceMapping.class).value();
+			restResourceName = name == null ? restResourceClass.getName() : name;
+		} catch (ObjectCreatorException e) {
+			throw new RestResourceException("Could not create restResource object : " + e.getMessage());
 		}
 	}
 
-	private void createNewRestResourceObject() throws InstantiationException, IllegalAccessException,
-			IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException {
-		this.restResourceObject = restResourceClass.getDeclaredConstructor().newInstance();
+	private void mapRequestMethods() {
 
-	}
-
-	private void setRestResourceName() {
-
-		String name = restResourceClass.getAnnotation(RESTResourceMapping.class).value();
-		this.restResourceName = name == null ? restResourceClass.getName() : name;
-
-	}
-
-	private void mapMethodsByRequestType() {
-
+		requestMethodMap = new HashMap<Pair<HTTPRequestMethod, HTTPURLPath>, Method>();
 		Method[] restResourceMethods = restResourceClass.getMethods();
+		// Default
+		String path = "/";
+		HTTPRequestMethod requestMethodType = null;
 
 		for (Method m : restResourceMethods) {
-			for (Annotation annotation : m.getAnnotations()) {
+			Annotation[] annotations = m.getAnnotations();
+			for (Annotation annotation : annotations) {
 				if (annotation instanceof GET) {
-					requestMethodMap.put(HTTPRequestMethod.GET, m);
+					requestMethodType = HTTPRequestMethod.GET;
 				} else if (annotation instanceof POST) {
-					requestMethodMap.put(HTTPRequestMethod.POST, m);
+					requestMethodType = HTTPRequestMethod.POST;
 				} else if (annotation instanceof DELETE) {
-					requestMethodMap.put(HTTPRequestMethod.DELETE, m);
+					requestMethodType = HTTPRequestMethod.DELETE;
 				} else if (annotation instanceof PUT) {
-					requestMethodMap.put(HTTPRequestMethod.PUT, m);
+					requestMethodType = HTTPRequestMethod.PUT;
+				} else if (annotation instanceof Path) {
+					path = restResourceName + ((Path) annotation).value();
 				}
+			}
+
+			if (path != null && requestMethodType != null) {
+				requestMethodMap.put(new Pair<HTTPRequestMethod, HTTPURLPath>(requestMethodType, new HTTPURLPath(path)),
+						m);
 			}
 		}
 	}
+
 }

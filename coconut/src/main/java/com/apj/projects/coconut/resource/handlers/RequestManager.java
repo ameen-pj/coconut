@@ -33,7 +33,7 @@ import com.apj.projects.coconut.resource.handlers.exceptions.ResourceHandlerNotI
 import com.apj.projects.coconut.utils.AnnotationScanner;
 import com.apj.projects.coconut.utils.Pair;
 
-public class RequestHandler implements Runnable {
+public class RequestManager implements Runnable {
 
 	private Socket socket;
 	private InputStream in;
@@ -44,7 +44,7 @@ public class RequestHandler implements Runnable {
 
 	private static HashMap<String, Pair<Object, Method>> handlers = getHandlers();
 
-	public RequestHandler(Socket socket, InputStream in, OutputStream out) {
+	public RequestManager(Socket socket, InputStream in, OutputStream out) {
 		// IO
 		this.socket = socket;
 		this.in = in;
@@ -56,31 +56,6 @@ public class RequestHandler implements Runnable {
 		response.setHTTPVersion(HTTPVersion.HTTP_1_1);
 
 	}
-
-//	private ResourceType getResourceType() {
-//
-//		if (new HTTPURLPath("/rest").isParentPathOf(request.getHTTPURLPath())) {
-//			return ResourceType.REST_RESOURCE;
-//		} else if (new HTTPURLPath("/file").isParentPathOf(request.getHTTPURLPath())) {
-//			return ResourceType.FILE_RESOURCE;
-//		} else {
-//			return ResourceType.UNKNOWN;
-//		}
-//
-//	}
-
-//	private void handleRequest() {
-//
-//		ResourceType requestType = getResourceType();
-//
-//		if (requestType == ResourceType.REST_RESOURCE) {
-//			RESTResourceHandler.getHandler().handle(request, response);
-//		} else if (requestType == ResourceType.FILE_RESOURCE) {
-//
-//		} else {
-//			response.setStatus(HTTPStatusCode.NOT_FOUND);
-//		}
-//	}
 
 	private void handleRequest()
 			throws BadURLException, GeneralServerException, ResourceHandlerNotImplementedException {
@@ -134,16 +109,7 @@ public class RequestHandler implements Runnable {
 				Method handleMethod = handlerClass.getDeclaredMethod("handle", HTTPRequest.class, HTTPResponse.class);
 				Object object = handlerClass.getDeclaredConstructor().newInstance();
 
-				try {
-					Method setResourceType = handlerClass.getDeclaredMethod("setResourceType", String.class);
-					setResourceType.invoke(object, resourceType);
-					resourceHandler.put(resourceType, new Pair<Object, Method>(object, handleMethod));
-
-				} catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException
-						| InvocationTargetException e) {
-					System.out.println("[ERROR]: Could not set resource type");
-					System.err.println(e.getMessage());
-				}
+				resourceHandler.put(resourceType, new Pair<Object, Method>(object, handleMethod));
 
 			} catch (NoSuchMethodException e) {
 				System.err.println("[ERROR]: Could not load " + resourceType
@@ -153,6 +119,7 @@ public class RequestHandler implements Runnable {
 				e.printStackTrace();
 			} catch (InstantiationException | IllegalAccessException | IllegalArgumentException
 					| InvocationTargetException e) {
+				e.printStackTrace();
 				System.err.println("[ERROR]: Could not create " + resourceType + "handler object");
 			}
 

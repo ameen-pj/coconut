@@ -49,7 +49,17 @@ public class HTTPURLPath {
 		throw new BadURLException("Cannot extract ResourceName from urlPath: " + pathString);
 	}
 
-	public HashMap<String, String> getParams(String urlExpression) {
+	public String getChildPathOf(String parent) throws BadURLException {
+		int idx = pathString.indexOf(parent);
+		if (idx != -1) {
+			int start = idx + parent.length();
+			return pathString.substring(start, pathString.length());
+		} else {
+			throw new BadURLException("No Child path of " + parent + " present");
+		}
+	}
+
+	public HashMap<String, String> getUrlParams(String urlExpression) {
 
 		HashMap<String, String> params = new HashMap<>();
 
@@ -67,6 +77,14 @@ public class HTTPURLPath {
 			}
 		}
 		return params;
+	}
+
+	public static void main(String[] args) throws BadURLException {
+
+		HTTPURLPath p1 = new HTTPURLPath("/rest/student/search?id=10");
+		System.out.println(p1.getPathString());
+		System.out.println(p1.getChildPathOf("rest"));
+		System.out.println(p1.getUrlParams("/rest/{resource}/search?id={search}"));
 
 	}
 }
