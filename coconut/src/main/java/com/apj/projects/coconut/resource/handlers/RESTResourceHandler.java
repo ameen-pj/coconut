@@ -13,7 +13,7 @@ import org.reflections.Reflections;
 import com.apj.projects.coconut.http.HTTPBody;
 import com.apj.projects.coconut.http.HTTPRequest;
 import com.apj.projects.coconut.http.HTTPResponse;
-import com.apj.projects.coconut.http.HTTPURLPath;
+import com.apj.projects.coconut.http.URLPath;
 import com.apj.projects.coconut.http.enums.HTTPRequestMethod;
 import com.apj.projects.coconut.http.enums.HTTPStatusCode;
 import com.apj.projects.coconut.resource.handlers.annotations.Handler;
@@ -56,17 +56,16 @@ public class RESTResourceHandler extends ResourceHandler {
 	}
 
 	@Override
-	public void handle(HTTPRequest request, HTTPResponse response) {
+	public void handle(HTTPRequest request, HTTPResponse response) throws Exception {
 
-		HashMap<String, String> params = request.getHTTPURLPath().getUrlParams("/rest/{resourceName}");
+		String resourceName = request.getHTTPURLPath().getPathPartByIndex(1);
 
-		if (params.containsKey("resourceName")) {
-			String resourceName = params.get("resourceName");
+		if (resourceName != null) {
 
 			if (restResourcesDataMap.containsKey(resourceName)) {
 				try {
 					try {
-						Pair<HTTPRequestMethod, HTTPURLPath> pair = new Pair<HTTPRequestMethod, HTTPURLPath>(
+						Pair<HTTPRequestMethod, URLPath> pair = new Pair<HTTPRequestMethod, URLPath>(
 								request.getHTTPRequestMethod(), request.getHTTPURLPath());
 						Method m = restResourcesDataMap.get(resourceName).getRequestMethodByPair(pair);
 						Object obj = restResourcesDataMap.get(resourceName).getRestResourceObject();
@@ -88,7 +87,46 @@ public class RESTResourceHandler extends ResourceHandler {
 			} else {
 				response.setStatus(HTTPStatusCode.NOT_FOUND).setBody(new HTTPBody("Resource could not be found"));
 			}
+		} else {
+			response.setStatus(HTTPStatusCode.NOT_FOUND).setBody(new HTTPBody("Resource could not be found"));
 		}
+
 	}
+
+//	@Override
+//	public void handle(HTTPRequest request, HTTPResponse response) {
+//
+//		HashMap<String, String> params = request.getHTTPURLPath().getUrlParams("/rest/{resourceName}");
+//
+//		if (params.containsKey("resourceName")) {
+//			String resourceName = params.get("resourceName");
+//
+//			if (restResourcesDataMap.containsKey(resourceName)) {
+//				try {
+//					try {
+//						Pair<HTTPRequestMethod, HTTPURLPath> pair = new Pair<HTTPRequestMethod, HTTPURLPath>(
+//								request.getHTTPRequestMethod(), request.getHTTPURLPath());
+//						Method m = restResourcesDataMap.get(resourceName).getRequestMethodByPair(pair);
+//						Object obj = restResourcesDataMap.get(resourceName).getRestResourceObject();
+//
+//						m.invoke(obj);
+//
+//					} catch (UnsupportedRestResourceMethodException e) {
+//						response.setStatus(HTTPStatusCode.NOT_IMPLEMENTED).setBody(new HTTPBody(e.getMessage()));
+//						e.printStackTrace();
+//					} catch (IllegalAccessException | InvocationTargetException e) {
+//						response.setStatus(HTTPStatusCode.INTERNAL_SERVER_ERROR)
+//								.setBody(new HTTPBody(e.getLocalizedMessage()));
+//						e.printStackTrace();
+//					}
+//				} catch (BadRESTResourceMethodException e) {
+//					response.setStatus(HTTPStatusCode.INTERNAL_SERVER_ERROR)
+//							.setBody(new HTTPBody(e.getLocalizedMessage()));
+//				}
+//			} else {
+//				response.setStatus(HTTPStatusCode.NOT_FOUND).setBody(new HTTPBody("Resource could not be found"));
+//			}
+//		}
+//	}
 
 }

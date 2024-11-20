@@ -11,7 +11,6 @@ import com.apj.projects.coconut.resource.rest.annotations.RESTResourceMapping;
 @RESTResourceMapping("student")
 public class StudentResource extends RESTResource<Student> {
 
-	@Override
 	@Path("/")
 	@GET
 	public void create() {
@@ -19,7 +18,6 @@ public class StudentResource extends RESTResource<Student> {
 
 	}
 
-	@Override
 	@Path("/")
 	@POST
 	public Student get(long id) {
@@ -27,7 +25,6 @@ public class StudentResource extends RESTResource<Student> {
 		return null;
 	}
 
-	@Override
 	@Path("/")
 	@PUT
 	public void update(Student obj) {
@@ -35,7 +32,6 @@ public class StudentResource extends RESTResource<Student> {
 
 	}
 
-	@Override
 	@Path("/")
 	@DELETE
 	public void delete(long id) {

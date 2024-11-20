@@ -12,7 +12,7 @@ public class HTTPRequest {
 
 	private String HTTPVersion;
 	private HTTPRequestMethod HTTPRequestMethod;
-	private HTTPURLPath HTTPURLPath;
+	private URLPath HTTPURLPath;
 	private Map<String, List<String>> headers;
 	private Optional<?> body;
 
@@ -26,7 +26,7 @@ public class HTTPRequest {
 		this.HTTPRequestMethod = method;
 	}
 
-	public void setHTTPURLPath(HTTPURLPath path) {
+	public void setHTTPURLPath(URLPath path) {
 		this.HTTPURLPath = path;
 	}
 
@@ -48,7 +48,7 @@ public class HTTPRequest {
 		return this.HTTPRequestMethod;
 	}
 
-	public HTTPURLPath getHTTPURLPath() {
+	public URLPath getHTTPURLPath() {
 		return this.HTTPURLPath;
 	}
 

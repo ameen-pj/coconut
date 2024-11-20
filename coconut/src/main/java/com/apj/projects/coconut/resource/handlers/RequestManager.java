@@ -24,7 +24,6 @@ import com.apj.projects.coconut.http.exceptions.BadHTTPBodyException;
 import com.apj.projects.coconut.http.exceptions.BadHTTPHeadersException;
 import com.apj.projects.coconut.http.exceptions.BadHTTPRequestException;
 import com.apj.projects.coconut.http.exceptions.BadHTTPResponseException;
-import com.apj.projects.coconut.http.exceptions.BadURLException;
 import com.apj.projects.coconut.http.exceptions.HTTPRequestParsingException;
 import com.apj.projects.coconut.http.exceptions.HTTPResponseWriterException;
 import com.apj.projects.coconut.resource.handlers.annotations.Handler;
@@ -57,9 +56,9 @@ public class RequestManager implements Runnable {
 
 	}
 
-	private void handleRequest()
-			throws BadURLException, GeneralServerException, ResourceHandlerNotImplementedException {
-		String resourceType = request.getHTTPURLPath().getResourceType();
+	private void handleRequest() throws GeneralServerException, ResourceHandlerNotImplementedException {
+
+		String resourceType = request.getHTTPURLPath().getPathPartByIndex(0);
 		Pair<Object, Method> resourceHandlerInfo = handlers.get(resourceType);
 
 		if (resourceHandlerInfo != null) {
@@ -134,7 +133,7 @@ public class RequestManager implements Runnable {
 		try {
 			this.request = new HTTPRequestParser(in).parse();
 			handleRequest();
-		} catch (BadHTTPRequestException | BadURLException e) {
+		} catch (BadHTTPRequestException e) {
 			System.err.println(e.getMessage());
 			response.setStatus(HTTPStatusCode.BAD_REQUEST);
 		} catch (HTTPRequestParsingException | GeneralServerException e) {

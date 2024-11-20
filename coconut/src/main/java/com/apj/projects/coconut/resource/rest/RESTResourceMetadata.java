@@ -5,7 +5,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.util.HashMap;
 
-import com.apj.projects.coconut.http.HTTPURLPath;
+import com.apj.projects.coconut.http.URLPath;
 import com.apj.projects.coconut.http.enums.HTTPRequestMethod;
 import com.apj.projects.coconut.resource.handlers.annotations.Path;
 import com.apj.projects.coconut.resource.rest.annotations.DELETE;
@@ -27,7 +27,7 @@ public class RESTResourceMetadata {
 	private Object restResourceObject;
 	private String restResourceName;
 
-	private HashMap<Pair<HTTPRequestMethod, HTTPURLPath>, Method> requestMethodMap;
+	private HashMap<Pair<HTTPRequestMethod, URLPath>, Method> requestMethodMap;
 
 	public RESTResourceMetadata(Class<?> restResourceClass) throws RestResourceException {
 
@@ -57,7 +57,7 @@ public class RESTResourceMetadata {
 		return (RESTResource<? extends Entity>) restResourceObject;
 	}
 
-	public Method getRequestMethodByPair(Pair<HTTPRequestMethod, HTTPURLPath> pair)
+	public Method getRequestMethodByPair(Pair<HTTPRequestMethod, URLPath> pair)
 			throws UnsupportedRestResourceMethodException {
 		Method method = requestMethodMap.get(pair);
 		if (method == null) {
@@ -81,7 +81,7 @@ public class RESTResourceMetadata {
 
 	private void mapRequestMethods() {
 
-		requestMethodMap = new HashMap<Pair<HTTPRequestMethod, HTTPURLPath>, Method>();
+		requestMethodMap = new HashMap<Pair<HTTPRequestMethod, URLPath>, Method>();
 		Method[] restResourceMethods = restResourceClass.getMethods();
 		// Default
 		String path = "/";
@@ -104,10 +104,11 @@ public class RESTResourceMetadata {
 			}
 
 			if (path != null && requestMethodType != null) {
-				requestMethodMap.put(new Pair<HTTPRequestMethod, HTTPURLPath>(requestMethodType, new HTTPURLPath(path)),
-						m);
+				requestMethodMap.put(new Pair<HTTPRequestMethod, URLPath>(requestMethodType, new URLPath(path)), m);
 			}
 		}
+
+		System.out.println(requestMethodMap);
 	}
 
 }
