@@ -58,8 +58,6 @@ public class HTTPResponse {
 					break;
 				}
 			}
-		} else {
-			setContentType(HTTPContentTypes.TEXT_PLAIN);
 		}
 		return this;
 	}

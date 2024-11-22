@@ -18,6 +18,7 @@ import com.apj.projects.coconut.http.HTTPRequest;
 import com.apj.projects.coconut.http.HTTPRequestParser;
 import com.apj.projects.coconut.http.HTTPResponse;
 import com.apj.projects.coconut.http.HTTPResponseWriter;
+import com.apj.projects.coconut.http.enums.HTTPContentTypes;
 import com.apj.projects.coconut.http.enums.HTTPStatusCode;
 import com.apj.projects.coconut.http.enums.HTTPVersion;
 import com.apj.projects.coconut.http.exceptions.BadHTTPBodyException;
@@ -69,8 +70,8 @@ public class RequestManager implements Runnable {
 			} catch (IllegalAccessException e) {
 				throw new GeneralServerException(e.getMessage());
 			} catch (InvocationTargetException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
+				throw new GeneralServerException(e.getMessage());
 			}
 
 		} else {
@@ -132,6 +133,7 @@ public class RequestManager implements Runnable {
 
 		try {
 			this.request = new HTTPRequestParser(in).parse();
+			response.setContentType(HTTPContentTypes.TEXT_PLAIN);
 			handleRequest();
 		} catch (BadHTTPRequestException e) {
 			System.err.println(e.getMessage());

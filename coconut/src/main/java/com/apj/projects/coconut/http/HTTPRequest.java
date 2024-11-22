@@ -13,6 +13,7 @@ public class HTTPRequest {
 	private String HTTPVersion;
 	private HTTPRequestMethod HTTPRequestMethod;
 	private URLPath HTTPURLPath;
+	private String queryParamString;
 	private Map<String, List<String>> headers;
 	private Optional<?> body;
 
@@ -36,6 +37,10 @@ public class HTTPRequest {
 
 	public <T> void setBody(T data) {
 		this.body = Optional.ofNullable(data);
+	}
+
+	public void setQueryParamString(String queryParamString) {
+		this.queryParamString = queryParamString;
 	}
 
 	// Getters
@@ -68,6 +73,10 @@ public class HTTPRequest {
 
 	public Optional<?> getBody() {
 		return body;
+	}
+
+	public String getQueryParamString() {
+		return queryParamString;
 	}
 
 }

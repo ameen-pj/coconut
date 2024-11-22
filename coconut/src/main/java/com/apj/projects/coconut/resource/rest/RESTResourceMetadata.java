@@ -32,8 +32,8 @@ public class RESTResourceMetadata {
 	public RESTResourceMetadata(Class<?> restResourceClass) throws RestResourceException {
 
 		this.restResourceClass = restResourceClass;
-		this.restEntityClass = ((ParameterizedType) restResourceClass.getGenericSuperclass())
-				.getActualTypeArguments()[0].getClass();
+		this.restEntityClass = (Class<?>) ((ParameterizedType) restResourceClass.getGenericSuperclass())
+				.getActualTypeArguments()[0];
 
 		createResourceObject();
 		mapRequestMethods();
@@ -53,12 +53,13 @@ public class RESTResourceMetadata {
 	}
 
 	@SuppressWarnings("unchecked")
-	public RESTResource<? extends Entity> getRestResourceObject() {
+	public Object getRestResourceObject() {
 		return (RESTResource<? extends Entity>) restResourceObject;
 	}
 
 	public Method getRequestMethodByPair(Pair<HTTPRequestMethod, URLPath> pair)
 			throws UnsupportedRestResourceMethodException {
+
 		Method method = requestMethodMap.get(pair);
 		if (method == null) {
 			throw new UnsupportedRestResourceMethodException(
@@ -70,7 +71,7 @@ public class RESTResourceMetadata {
 	private void createResourceObject() throws RestResourceException {
 		// Initializing restResource object
 		try {
-			restResourceObject = new ObjectCreator(restResourceClass);
+			restResourceObject = new ObjectCreator(restResourceClass).createObject();
 			// Setting name
 			String name = restResourceClass.getAnnotation(RESTResourceMapping.class).value();
 			restResourceName = name == null ? restResourceClass.getName() : name;
@@ -82,13 +83,13 @@ public class RESTResourceMetadata {
 	private void mapRequestMethods() {
 
 		requestMethodMap = new HashMap<Pair<HTTPRequestMethod, URLPath>, Method>();
-		Method[] restResourceMethods = restResourceClass.getMethods();
+		Method[] restResourceMethods = restResourceClass.getDeclaredMethods();
 		// Default
 		String path = "/";
 		HTTPRequestMethod requestMethodType = null;
 
 		for (Method m : restResourceMethods) {
-			Annotation[] annotations = m.getAnnotations();
+			Annotation[] annotations = m.getDeclaredAnnotations();
 			for (Annotation annotation : annotations) {
 				if (annotation instanceof GET) {
 					requestMethodType = HTTPRequestMethod.GET;
@@ -99,16 +100,19 @@ public class RESTResourceMetadata {
 				} else if (annotation instanceof PUT) {
 					requestMethodType = HTTPRequestMethod.PUT;
 				} else if (annotation instanceof Path) {
-					path = restResourceName + ((Path) annotation).value();
+					path = "/rest/" + restResourceName + "/" + ((Path) annotation).value();
 				}
 			}
-
 			if (path != null && requestMethodType != null) {
-				requestMethodMap.put(new Pair<HTTPRequestMethod, URLPath>(requestMethodType, new URLPath(path)), m);
+				Pair<HTTPRequestMethod, URLPath> pair = new Pair<HTTPRequestMethod, URLPath>(requestMethodType,
+						new URLPath(path));
+
+				if (!requestMethodMap.containsKey(pair))
+					requestMethodMap.put(pair, m);
+				else
+					System.out.println(pair + " already exists with the same path. Neglecting current pair");
 			}
 		}
-
-		System.out.println(requestMethodMap);
 	}
 
 }

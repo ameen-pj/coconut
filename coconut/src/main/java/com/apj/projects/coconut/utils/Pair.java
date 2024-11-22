@@ -34,16 +34,13 @@ public class Pair<K, V> {
 	}
 
 	@Override
-	public boolean equals(Object o) {
-		if (this == o)
-			return true;
-		if (o instanceof Pair<?, ?>) {
-			Pair<?, ?> oPair = (Pair<?, ?>) o;
-			if ((oPair.getKey().equals(getKey())) && (oPair.getValue().equals(getValue()))) {
-				return true;
-			}
-		}
-		return false;
+	public boolean equals(Object obj) {
+		return hashCode() == obj.hashCode();
+	}
+
+	@Override
+	public String toString() {
+		return "<" + key + ", " + value + ">";
 	}
 
 }
