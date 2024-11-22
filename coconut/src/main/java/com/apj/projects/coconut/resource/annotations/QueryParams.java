@@ -1,14 +1,14 @@
-package com.apj.projects.coconut.resource.handlers.annotations;
+package com.apj.projects.coconut.resource.annotations;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+@Target(ElementType.PARAMETER)
 @Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.METHOD)
-public @interface Path {
+public @interface QueryParams {
 
-	String value() default "/";
+	public String value();
 
 }

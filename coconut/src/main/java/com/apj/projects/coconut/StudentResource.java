@@ -1,46 +1,39 @@
 package com.apj.projects.coconut;
 
+import com.apj.projects.coconut.http.enums.HTTPContentTypes;
+import com.apj.projects.coconut.resource.annotations.QueryParams;
+import com.apj.projects.coconut.resource.annotations.RequestBody;
 import com.apj.projects.coconut.resource.handlers.annotations.Path;
 import com.apj.projects.coconut.resource.rest.RESTResource;
-import com.apj.projects.coconut.resource.rest.annotations.DELETE;
+import com.apj.projects.coconut.resource.rest.annotations.Consumes;
 import com.apj.projects.coconut.resource.rest.annotations.GET;
 import com.apj.projects.coconut.resource.rest.annotations.POST;
-import com.apj.projects.coconut.resource.rest.annotations.PUT;
+import com.apj.projects.coconut.resource.rest.annotations.Produces;
 import com.apj.projects.coconut.resource.rest.annotations.RESTResourceMapping;
 
 @RESTResourceMapping("student")
 public class StudentResource extends RESTResource<Student> {
 
-	@Override
 	@Path("/")
 	@GET
-	public void create() {
-		System.out.println("in create");
-
+	@Produces(HTTPContentTypes.APPLICATION_JSON)
+	public Student getStudentById(@QueryParams("id") long id) {
+		return new Student(id, "Ameen");
 	}
 
-	@Override
+	@Path("/")
+	@GET
+	@Produces(HTTPContentTypes.APPLICATION_JSON)
+	public Student[] getAllStudents() {
+		return new Student[] { new Student(1, "John"), new Student(2, "Mary") };
+	}
+
 	@Path("/")
 	@POST
-	public Student get(long id) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	@Path("/")
-	@PUT
-	public void update(Student obj) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	@Path("/")
-	@DELETE
-	public void delete(long id) {
-		// TODO Auto-generated method stub
-
+	@Consumes(HTTPContentTypes.APPLICATION_JSON)
+	@Produces(HTTPContentTypes.APPLICATION_JSON)
+	public Student createStudent(@RequestBody Student student) {
+		return student;
 	}
 
 }

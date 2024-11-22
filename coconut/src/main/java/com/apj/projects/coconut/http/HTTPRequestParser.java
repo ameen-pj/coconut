@@ -33,7 +33,8 @@ public class HTTPRequestParser {
 			this.request = new HTTPRequest();
 			request.setHTTPVersion(HTTPVersion.HTTP_1_1);
 			request.setHTTPRequestMethod(HTTPRequestMethod.valueOf(rawRequest.getMethod()));
-			request.setHTTPURLPath(new HTTPURLPath(rawRequest.getUri().getPath()));
+			request.setQueryParamString(rawRequest.getUri().getQuery());
+			request.setHTTPURLPath(new URLPath(rawRequest.getUri().getPath()));
 			request.setHeaders(rawRequest.getHeaders().asMap());
 			request.setBody(rawRequest.eagerly().getBody().map(BodyReader::toString).orElse(null));
 			return request;

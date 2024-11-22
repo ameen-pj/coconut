@@ -1,6 +1,6 @@
 package com.apj.projects.coconut.resource.rest.exceptions;
 
-public class BadRESTResourceMethodException extends RuntimeException {
+public class BadRESTResourceMethodException extends Exception {
 
 	private static final long serialVersionUID = 6277042328138186664L;
 
