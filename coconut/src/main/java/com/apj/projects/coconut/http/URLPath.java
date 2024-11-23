@@ -74,15 +74,6 @@ public class URLPath {
 		}
 	}
 
-	@Deprecated
-	public String getAbsolutePath() {
-		String s = getPathString();
-		if (containsQueryParams()) {
-			return s.substring(0, s.indexOf("?"));
-		}
-		return s;
-	}
-
 	public static HashMap<String, Object> getQueryParams(String queryParamString) {
 
 		HashMap<String, Object> params = new HashMap<>();
