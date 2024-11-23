@@ -2,7 +2,6 @@ package com.apj.projects.coconut.resource.rest;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
-import java.lang.reflect.ParameterizedType;
 import java.util.HashMap;
 
 import com.apj.projects.coconut.http.URLPath;
@@ -22,7 +21,6 @@ import com.apj.projects.coconut.utils.Pair;
 public class RESTResourceMetadata {
 
 	private Class<?> restResourceClass;
-	private Class<?> restEntityClass;
 
 	private Object restResourceObject;
 	private String restResourceName;
@@ -32,8 +30,6 @@ public class RESTResourceMetadata {
 	public RESTResourceMetadata(Class<?> restResourceClass) throws RestResourceException {
 
 		this.restResourceClass = restResourceClass;
-		this.restEntityClass = (Class<?>) ((ParameterizedType) restResourceClass.getGenericSuperclass())
-				.getActualTypeArguments()[0];
 
 		createResourceObject();
 		mapRequestMethods();
@@ -46,10 +42,6 @@ public class RESTResourceMetadata {
 
 	public Class<?> getRestResourceClass() {
 		return restResourceClass;
-	}
-
-	public Class<?> getRestEntityClass() {
-		return restEntityClass;
 	}
 
 	@SuppressWarnings("unchecked")
