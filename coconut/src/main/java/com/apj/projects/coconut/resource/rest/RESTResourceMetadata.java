@@ -44,9 +44,8 @@ public class RESTResourceMetadata {
 		return restResourceClass;
 	}
 
-	@SuppressWarnings("unchecked")
 	public Object getRestResourceObject() {
-		return (RESTResource<? extends Entity>) restResourceObject;
+		return restResourceObject;
 	}
 
 	public Method getRequestMethodByPair(Pair<HTTPRequestMethod, URLPath> pair)
