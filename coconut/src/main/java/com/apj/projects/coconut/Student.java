@@ -1,8 +1,6 @@
 package com.apj.projects.coconut;
 
-import com.apj.projects.coconut.resource.rest.Entity;
-
-public class Student extends Entity {
+public class Student {
 
 	private long id;
 	private String name;
@@ -16,7 +14,6 @@ public class Student extends Entity {
 		this.name = name;
 	}
 
-	@Override
 	public void setId(long id) {
 		this.id = id;
 
@@ -26,7 +23,6 @@ public class Student extends Entity {
 		this.name = name;
 	}
 
-	@Override
 	public long getId() {
 		return id;
 	}
