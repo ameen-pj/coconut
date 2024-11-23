@@ -55,12 +55,8 @@ public class RESTResourceHandler extends ResourceHandler {
 
 		for (Class<?> restResourceClass : restResourcesClasses) {
 			RESTResourceMetadata resourceMetadata;
-			try {
-				resourceMetadata = new RESTResourceMetadata(restResourceClass);
-				restResourcesDataMap.put(resourceMetadata.getRestResourceName(), resourceMetadata);
-			} catch (RestResourceException e) {
-				throw e;
-			}
+			resourceMetadata = new RESTResourceMetadata(restResourceClass);
+			restResourcesDataMap.put(resourceMetadata.getRestResourceName(), resourceMetadata);
 		}
 	}
 
