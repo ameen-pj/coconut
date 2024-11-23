@@ -118,9 +118,9 @@ public class RESTResourceHandler extends ResourceHandler {
 								if (body.isPresent()) {
 									jsonString = request.getBody().get().toString();
 								}
-								Class<?> restEntityClass = restResourcesDataMap.get(resourceName).getRestEntityClass();
 								try {
-									Object obj = JSONObjectMapper.getMapper().readValue(jsonString, restEntityClass);
+									Object obj = JSONObjectMapper.getMapper().readValue(jsonString,
+											resourceMethodParam.getType());
 									methodArgs.add(obj);
 								} catch (JsonMappingException e) {
 									e.printStackTrace();
