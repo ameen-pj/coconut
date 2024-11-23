@@ -1,7 +1,6 @@
 package com.apj.projects.coconut.resource.handlers;
 
-import static org.reflections.scanners.Scanners.SubTypes;
-import static org.reflections.util.ReflectionUtilsPredicates.withAnnotation;
+import static org.reflections.scanners.Scanners.TypesAnnotated;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
@@ -27,7 +26,6 @@ import com.apj.projects.coconut.resource.annotations.QueryParams;
 import com.apj.projects.coconut.resource.annotations.RequestBody;
 import com.apj.projects.coconut.resource.handlers.annotations.Handler;
 import com.apj.projects.coconut.resource.handlers.exceptions.GeneralServerException;
-import com.apj.projects.coconut.resource.rest.RESTResource;
 import com.apj.projects.coconut.resource.rest.RESTResourceMetadata;
 import com.apj.projects.coconut.resource.rest.annotations.Consumes;
 import com.apj.projects.coconut.resource.rest.annotations.Produces;
@@ -61,8 +59,7 @@ public class RESTResourceHandler extends ResourceHandler {
 	}
 
 	public static Set<Class<?>> scanRESTResources() {
-		return reflections
-				.get(SubTypes.of(RESTResource.class).asClass().filter(withAnnotation(RESTResourceMapping.class)));
+		return reflections.get(TypesAnnotated.with(RESTResourceMapping.class).asClass());
 	}
 
 	public void resourceMethodHandler(String resourceName, HTTPRequest request, HTTPResponse response)
