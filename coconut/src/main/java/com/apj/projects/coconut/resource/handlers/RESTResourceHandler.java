@@ -21,7 +21,6 @@ import com.apj.projects.coconut.http.enums.HTTPContentTypes;
 import com.apj.projects.coconut.http.enums.HTTPRequestMethod;
 import com.apj.projects.coconut.http.enums.HTTPStatusCode;
 import com.apj.projects.coconut.http.exceptions.BadHTTPRequestException;
-import com.apj.projects.coconut.json.JSONObjectMapper;
 import com.apj.projects.coconut.resource.annotations.QueryParams;
 import com.apj.projects.coconut.resource.annotations.RequestBody;
 import com.apj.projects.coconut.resource.handlers.annotations.Handler;
@@ -35,6 +34,7 @@ import com.apj.projects.coconut.resource.rest.exceptions.RestResourceException;
 import com.apj.projects.coconut.resource.rest.exceptions.UnsupportedRestResourceMethodException;
 import com.apj.projects.coconut.utils.AnnotationScanner;
 import com.apj.projects.coconut.utils.Pair;
+import com.apj.projects.coconut.utils.json.JSONObjectMapper;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 

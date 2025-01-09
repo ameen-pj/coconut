@@ -39,7 +39,7 @@ public class HTTPResponseWriter {
 					"Cannot build a response with an invalid HTTP version or HTTP status code");
 		}
 
-		Map<String, List<String>> headers = response.getHeaders();
+		Map<String, List<String>> headers = this.response.getHeaders();
 		if (headers != null && headers.size() > 0) {
 			for (String key : headers.keySet()) {
 				responseString.append(key + ": ");

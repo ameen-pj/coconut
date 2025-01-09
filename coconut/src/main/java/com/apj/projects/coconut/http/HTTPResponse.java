@@ -58,6 +58,8 @@ public class HTTPResponse {
 					break;
 				}
 			}
+		} else {
+			setContentLength(body.getSize());
 		}
 		return this;
 	}

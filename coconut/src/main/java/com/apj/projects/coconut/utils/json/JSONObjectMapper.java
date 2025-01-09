@@ -1,4 +1,4 @@
-package com.apj.projects.coconut.json;
+package com.apj.projects.coconut.utils.json;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
