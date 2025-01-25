@@ -102,17 +102,4 @@ public class URLPath {
 	public int hashCode() {
 		return pathParts.hashCode();
 	}
-
-	public static void main(String[] args) {
-		URLPath p1 = new URLPath("/rest/student/search?id=10");
-		System.out.println(p1.getPathString());
-//		p1.join(new URLPath("/search?id=10"));
-//		System.out.println(p1.getPathString());
-
-//		URLPath p2 = new URLPath("");
-//		System.out.println(p1.getPathString());
-//		System.out.println(p2.getPathString());
-//		System.out.println(p2.equals(p1));
-
-	}
 }

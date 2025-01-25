@@ -9,13 +9,19 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.apj.projects.coconut.http.exceptions.BadHTTPBodyException;
 import com.apj.projects.coconut.http.exceptions.BadHTTPHeadersException;
 import com.apj.projects.coconut.http.exceptions.BadHTTPResponseException;
 import com.apj.projects.coconut.http.exceptions.HTTPResponseWriterException;
+import com.apj.projects.coconut.resource.handlers.RequestManager;
 import com.apj.projects.coconut.utils.FileSender;
 
 public class HTTPResponseWriter {
+
+	private static Logger logger = LoggerFactory.getLogger(RequestManager.class);
 
 	private HTTPResponse response;
 

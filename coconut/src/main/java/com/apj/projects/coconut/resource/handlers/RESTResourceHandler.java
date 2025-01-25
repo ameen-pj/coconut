@@ -12,6 +12,8 @@ import java.util.Optional;
 import java.util.Set;
 
 import org.reflections.Reflections;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.apj.projects.coconut.http.HTTPBody;
 import com.apj.projects.coconut.http.HTTPRequest;
@@ -41,6 +43,7 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 @Handler("rest")
 public class RESTResourceHandler extends ResourceHandler {
 
+	private static Logger logger = LoggerFactory.getLogger(RequestManager.class);
 	private static Reflections reflections = AnnotationScanner.getReflections();
 
 	private Set<Class<?>> restResourcesClasses;
@@ -175,13 +178,13 @@ public class RESTResourceHandler extends ResourceHandler {
 					resourceMethodHandler(resourceName, request, response);
 				} catch (UnsupportedRestResourceMethodException e) {
 					response.setStatus(HTTPStatusCode.NOT_IMPLEMENTED).setBody(new HTTPBody(e.getMessage()));
-					e.printStackTrace();
+					logger.error("UnsupportedRestResourceMethodException", e);
 				} catch (GeneralServerException | BadRESTResourceMethodException e) {
 					response.setStatus(HTTPStatusCode.INTERNAL_SERVER_ERROR).setBody(new HTTPBody(e.getMessage()));
-					e.printStackTrace();
+					logger.error("GeneralServerException | BadRESTResourceMethodException", e);
 				} catch (BadHTTPRequestException e) {
 					response.setStatus(HTTPStatusCode.BAD_REQUEST).setBody(new HTTPBody(e.getMessage()));
-					e.printStackTrace();
+					logger.error("BadHTTPRequestException", e);
 				}
 			} else {
 				response.setStatus(HTTPStatusCode.NOT_FOUND).setBody(new HTTPBody("Resource could not be found"));

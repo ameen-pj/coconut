@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration>
+	<Appenders>
+		<Console name="CONSOLE">
+			<PatternLayout disableAnsi="false" pattern="%highlight{[%p] [%c] %m%n}{INFO=black bold, ERROR=red bold}"/>		
+		</Console>
+	</Appenders>
+	
+	<Loggers>
+		<Root level="INFO"> 
+			<AppenderRef ref="CONSOLE" />
+    	</Root>
+	</Loggers>
+
+</Configuration>

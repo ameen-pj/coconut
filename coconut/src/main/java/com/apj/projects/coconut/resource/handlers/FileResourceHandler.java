@@ -13,15 +13,21 @@ import com.apj.projects.coconut.resource.handlers.annotations.Handler;
 public class FileResourceHandler extends ResourceHandler {
 
 	@Override
-	public void handle(HTTPRequest request, HTTPResponse response) throws Exception {
+	public void handle(HTTPRequest request, HTTPResponse response) {
 
 		String fileName = request.getHTTPURLPath().getPathPartByIndex(1);
 
 		if (fileName != null) {
 			File file = new File(fileName);
-			HTTPBody httpBody = new HTTPBody(file);
-			// Setting response
-			response.setStatus(HTTPStatusCode.OK).setBody(httpBody);
+			if (file.exists() && !file.isDirectory()) {
+				HTTPBody httpBody = new HTTPBody(file);
+				// Setting response
+				response.setStatus(HTTPStatusCode.OK).setBody(httpBody);
+			} else {
+				response.setContentType(HTTPContentTypes.TEXT_PLAIN).setStatus(HTTPStatusCode.NOT_FOUND)
+						.setBody(new HTTPBody("File named : " + fileName + " does not exist"));
+			}
+
 		} else {
 			response.setContentType(HTTPContentTypes.TEXT_PLAIN).setBody(new HTTPBody("No File Name provided"))
 					.setStatus(HTTPStatusCode.NO_CONTENT);

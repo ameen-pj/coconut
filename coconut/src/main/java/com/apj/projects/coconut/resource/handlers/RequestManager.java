@@ -13,7 +13,10 @@ import java.util.Set;
 
 import org.reflections.Reflections;
 import org.reflections.util.ReflectionUtilsPredicates;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import com.apj.projects.coconut.http.HTTPBody;
 import com.apj.projects.coconut.http.HTTPRequest;
 import com.apj.projects.coconut.http.HTTPRequestParser;
 import com.apj.projects.coconut.http.HTTPResponse;
@@ -34,6 +37,8 @@ import com.apj.projects.coconut.utils.AnnotationScanner;
 import com.apj.projects.coconut.utils.Pair;
 
 public class RequestManager implements Runnable {
+
+	private static Logger logger = LoggerFactory.getLogger(RequestManager.class);
 
 	private Socket socket;
 	private InputStream in;
@@ -68,6 +73,7 @@ public class RequestManager implements Runnable {
 			try {
 				invokeMethod.invoke(handlerObject, request, response);
 			} catch (IllegalAccessException e) {
+				e.printStackTrace();
 				throw new GeneralServerException(e.getMessage());
 			} catch (InvocationTargetException e) {
 				e.printStackTrace();
@@ -86,8 +92,7 @@ public class RequestManager implements Runnable {
 			try {
 				socket.close();
 			} catch (IOException e) {
-				System.err.println("[ERROR]: Could not close connection");
-				e.printStackTrace();
+				logger.error("Could not close connection", e);
 			}
 		}
 	}
@@ -112,15 +117,13 @@ public class RequestManager implements Runnable {
 				resourceHandler.put(resourceType, new Pair<Object, Method>(object, handleMethod));
 
 			} catch (NoSuchMethodException e) {
-				System.err.println("[ERROR]: Could not load " + resourceType
-						+ " handler as handle method is not declared or constructor is not declared");
-				System.err.println(e.getMessage());
+				logger.error("Could not load " + resourceType
+						+ " handler as handle method is not declared or constructor is not declared", e);
 			} catch (SecurityException e) {
-				e.printStackTrace();
+				logger.error("Internal Error", e);
 			} catch (InstantiationException | IllegalAccessException | IllegalArgumentException
 					| InvocationTargetException e) {
-				e.printStackTrace();
-				System.err.println("[ERROR]: Could not create " + resourceType + "handler object");
+				logger.error("Could not create " + resourceType + "handler object", e);
 			}
 
 		}
@@ -136,34 +139,36 @@ public class RequestManager implements Runnable {
 			response.setContentType(HTTPContentTypes.TEXT_PLAIN);
 			handleRequest();
 		} catch (BadHTTPRequestException e) {
-			System.err.println(e.getMessage());
-			response.setStatus(HTTPStatusCode.BAD_REQUEST);
+			logger.error("BadHTTPRequestException", e);
+			response.setStatus(HTTPStatusCode.BAD_REQUEST).setBody(new HTTPBody(e.getMessage()));
 		} catch (HTTPRequestParsingException | GeneralServerException e) {
-			System.err.println(e.getMessage());
-			response.setStatus(HTTPStatusCode.INTERNAL_SERVER_ERROR);
+			logger.error("Error", e);
+			response.setStatus(HTTPStatusCode.INTERNAL_SERVER_ERROR).setBody(new HTTPBody(e.getMessage()));
 		} catch (ResourceHandlerNotImplementedException e) {
-			response.setStatus(HTTPStatusCode.NOT_IMPLEMENTED);
-			System.err.println(e.getMessage());
+			response.setStatus(HTTPStatusCode.NOT_IMPLEMENTED).setBody(new HTTPBody(e.getMessage()));
+			logger.error("ResourceHandlerNotImplementedException", e);
 		} finally {
 			try {
 				responseWriter.buildResponse(response);
+				logger.info("[" + request.getHTTPRequestMethod() + "] " + request.getHTTPURLPath() + " ~ "
+						+ response.getStatus().getCode() + " " + response.getStatus().getMsg());
 			} catch (BadHTTPResponseException e) {
 				// dereference the old response object and initialize new error response object
 				response = new HTTPResponse();
-				response.setStatus(HTTPStatusCode.NO_CONTENT);
-				System.err.println(e.getMessage());
+				response.setStatus(HTTPStatusCode.NO_CONTENT).setBody(new HTTPBody(e.getMessage()));
+				logger.error("BadHTTPResponseException", e);
 			} catch (BadHTTPHeadersException e) {
-				System.err.println(e.getMessage());
-				response.setStatus(HTTPStatusCode.INTERNAL_SERVER_ERROR);
+				logger.error("BadHTTPHeadersException", e);
+				response = new HTTPResponse();
+				response.setStatus(HTTPStatusCode.INTERNAL_SERVER_ERROR).setBody(new HTTPBody(e.getMessage()));
 			} finally {
 				try {
 					responseWriter.send();
 				} catch (BadHTTPBodyException e) {
-					e.printStackTrace();
-					System.err.println(e.getMessage());
+					logger.error("BadHTTPBodyException", e);
+
 				} catch (HTTPResponseWriterException e) {
-					e.printStackTrace();
-					System.err.println(e.getMessage());
+					logger.error("HTTPResponseWriterException", e);
 				}
 				closeConnection();
 			}

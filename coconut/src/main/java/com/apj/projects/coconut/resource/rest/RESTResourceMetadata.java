@@ -4,6 +4,9 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.apj.projects.coconut.http.URLPath;
 import com.apj.projects.coconut.http.enums.HTTPRequestMethod;
 import com.apj.projects.coconut.resource.handlers.annotations.Path;
@@ -20,8 +23,9 @@ import com.apj.projects.coconut.utils.Pair;
 
 public class RESTResourceMetadata {
 
-	private Class<?> restResourceClass;
+	private static Logger logger = LoggerFactory.getLogger(RESTResourceMetadata.class);
 
+	private Class<?> restResourceClass;
 	private Object restResourceObject;
 	private String restResourceName;
 
@@ -101,7 +105,7 @@ public class RESTResourceMetadata {
 				if (!requestMethodMap.containsKey(pair))
 					requestMethodMap.put(pair, m);
 				else
-					System.out.println(pair + " already exists with the same path. Neglecting current pair");
+					logger.info(pair + " already exists with the same path. Neglecting current pair");
 			}
 		}
 	}

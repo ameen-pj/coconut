@@ -11,7 +11,7 @@ import com.apj.projects.coconut.http.exceptions.BadHTTPHeadersException;
 public class HTTPRequest {
 
 	private String HTTPVersion;
-	private HTTPRequestMethod HTTPRequestMethod;
+	private HTTPRequestMethod requestMethod;
 	private URLPath HTTPURLPath;
 	private String queryParamString;
 	private Map<String, List<String>> headers;
@@ -24,7 +24,7 @@ public class HTTPRequest {
 	}
 
 	public void setHTTPRequestMethod(HTTPRequestMethod method) {
-		this.HTTPRequestMethod = method;
+		this.requestMethod = method;
 	}
 
 	public void setHTTPURLPath(URLPath path) {
@@ -50,7 +50,7 @@ public class HTTPRequest {
 	}
 
 	public HTTPRequestMethod getHTTPRequestMethod() {
-		return this.HTTPRequestMethod;
+		return this.requestMethod;
 	}
 
 	public URLPath getHTTPURLPath() {

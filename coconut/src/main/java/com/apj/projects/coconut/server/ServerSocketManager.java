@@ -4,6 +4,9 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.apj.projects.coconut.concurent.ThreadpoolService;
 import com.apj.projects.coconut.concurent.exceptions.ThreadpoolServiceException;
 import com.apj.projects.coconut.resource.handlers.RequestManager;
@@ -11,15 +14,17 @@ import com.apj.projects.coconut.resource.handlers.RequestManager;
 // Singleton Socket object
 public class ServerSocketManager {
 
+	private static Logger logger = LoggerFactory.getLogger(ServerSocketManager.class);
+
 	private static ServerSocket serverSocket;
 
 	public static void openServerSocket() {
 		if (serverSocket == null) {
 			try {
 				serverSocket = new ServerSocket(8080);
-				System.out.println("[INFO]: Socket opened at port: " + 8080);
+				logger.info("Socket opened at port: " + 8080);
 			} catch (IOException e) {
-				System.out.println("[ERROR]: " + e.getMessage());
+				logger.error("ServerSocker Error" + e);
 				System.exit(0);
 			}
 		}
@@ -27,7 +32,7 @@ public class ServerSocketManager {
 
 	public static void listenForConnections() {
 
-		System.out.println("[INFO]: Listening for connections ...");
+		logger.info("Listening for connections ...");
 		ThreadpoolService threadpoolService = ThreadpoolService.getThreadPoolService();
 
 		while (true) {
@@ -41,25 +46,25 @@ public class ServerSocketManager {
 				try {
 					threadpoolService.execute(reqHandler);
 				} catch (ThreadpoolServiceException e) {
-					System.err.println("[ERROR]: " + e.getMessage());
+					logger.error("ThreadpoolService Error", e);
 				}
 
 			} catch (IOException e) {
-				System.err.println("[ERROR]: " + e.getMessage());
+				logger.error("ServerSocketError", e);
 			}
 		}
 	}
 
 	public static void closeServerSocket() {
 		if (serverSocket == null) {
-			System.out.println("[INFO]: No Socket to close");
+			logger.info("ServerSocketError: No Socket to Close");
 		}
 		if (!serverSocket.isClosed()) {
 			try {
 				serverSocket.close();
-				System.out.println("[INFO]: Socket closed");
+				logger.info("Socket closed");
 			} catch (IOException e) {
-				System.out.println("[ERROR]: " + e.getMessage());
+				logger.error("ServerSocketError", e);
 				System.exit(0);
 			}
 		}

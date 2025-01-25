@@ -4,9 +4,14 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.apj.projects.coconut.concurent.exceptions.ThreadpoolServiceException;
 
 public class ThreadpoolService {
+
+	private static Logger logger = LoggerFactory.getLogger(ThreadpoolService.class);
 
 	private static ThreadpoolService threadpoolService;
 	private static ExecutorService threadPool;
@@ -14,7 +19,7 @@ public class ThreadpoolService {
 	private ThreadpoolService() {
 
 		if (threadPool == null) {
-			System.out.println("[INFO]: Creating new cached threadpool ..");
+			logger.info("Creating new cached threadpool ..");
 			threadPool = Executors.newCachedThreadPool();
 		}
 	}
@@ -45,7 +50,7 @@ public class ThreadpoolService {
 			}
 			threadPool.shutdown();
 		}
-		System.out.println("Shutting down ..");
+		logger.info("Shutting down ...");
 
 	}
 
