@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.apj.projects.coconut.concurent.exceptions.ThreadpoolServiceException;
+import com.apj.projects.coconut.utils.PropertyManager;
 
 public class ThreadpoolService {
 
@@ -19,8 +20,25 @@ public class ThreadpoolService {
 	private ThreadpoolService() {
 
 		if (threadPool == null) {
-			logger.info("Creating new cached threadpool ..");
-			threadPool = Executors.newCachedThreadPool();
+
+			ThreadType threadType = PropertyManager.getThreadType();
+
+			if (threadType == ThreadType.CACHED_THREAD_POOL) {
+				threadPool = Executors.newCachedThreadPool();
+				logger.info("Creating new cached threadpool ..");
+			} else if (threadType == ThreadType.VIRTUAL_THREAD) {
+				threadPool = Executors.newVirtualThreadPerTaskExecutor();
+				logger.info("Creating new Virtual Thread Executor ...");
+			} else if (threadType == ThreadType.FIXED_THREAD_POOL) {
+				int nThreads = PropertyManager.getNThreads();
+				threadPool = Executors.newFixedThreadPool(nThreads);
+				logger.info("Creating new FixedThreadPool with " + nThreads + " threads ...");
+			} else {
+				logger.info(
+						"Could not find appropriate thread_type in coconut.properties ===> Switching to default ...");
+				threadPool = Executors.newCachedThreadPool();
+				logger.info("Creating new cached threadpool ..");
+			}
 		}
 	}
 
@@ -51,7 +69,6 @@ public class ThreadpoolService {
 			threadPool.shutdown();
 		}
 		logger.info("Shutting down ...");
-
 	}
 
 }

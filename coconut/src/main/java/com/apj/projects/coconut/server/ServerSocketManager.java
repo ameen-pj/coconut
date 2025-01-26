@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import com.apj.projects.coconut.concurent.ThreadpoolService;
 import com.apj.projects.coconut.concurent.exceptions.ThreadpoolServiceException;
 import com.apj.projects.coconut.resource.handlers.RequestManager;
+import com.apj.projects.coconut.utils.PropertyManager;
 
 // Singleton Socket object
 public class ServerSocketManager {
@@ -21,8 +22,9 @@ public class ServerSocketManager {
 	public static void openServerSocket() {
 		if (serverSocket == null) {
 			try {
-				serverSocket = new ServerSocket(8080);
-				logger.info("Socket opened at port: " + 8080);
+				int port = PropertyManager.getPort();
+				serverSocket = new ServerSocket(port);
+				logger.info("Socket opened at port: " + port);
 			} catch (IOException e) {
 				logger.error("ServerSocker Error" + e);
 				System.exit(0);
