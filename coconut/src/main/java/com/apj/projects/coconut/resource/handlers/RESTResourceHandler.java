@@ -50,10 +50,8 @@ public class RESTResourceHandler extends ResourceHandler {
 	private HashMap<String, RESTResourceMetadata> restResourcesDataMap;
 
 	public RESTResourceHandler() throws RestResourceException {
-
 		restResourcesClasses = scanRESTResources();
 		restResourcesDataMap = new HashMap<String, RESTResourceMetadata>();
-
 		for (Class<?> restResourceClass : restResourcesClasses) {
 			RESTResourceMetadata resourceMetadata;
 			resourceMetadata = new RESTResourceMetadata(restResourceClass);

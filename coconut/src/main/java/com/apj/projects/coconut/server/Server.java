@@ -20,6 +20,8 @@ public class Server {
 		logger.info("Starting Coconut ...");
 
 		try {
+			logger.info("Loading RequestManager ...");
+			Class.forName("com.apj.projects.coconut.resource.handlers.RequestManager");
 			ServerSocketManager.openServerSocket();
 			ServerSocketManager.listenForConnections();
 		} catch (Exception e) {
