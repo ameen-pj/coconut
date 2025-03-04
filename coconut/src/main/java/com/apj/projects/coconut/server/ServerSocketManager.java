@@ -60,8 +60,7 @@ public class ServerSocketManager {
 	public static void closeServerSocket() {
 		if (serverSocket == null) {
 			logger.info("ServerSocketError: No Socket to Close");
-		}
-		if (!serverSocket.isClosed()) {
+		} else if (!serverSocket.isClosed()) {
 			try {
 				serverSocket.close();
 				logger.info("Socket closed");
