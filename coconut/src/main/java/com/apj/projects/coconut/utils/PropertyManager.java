@@ -2,6 +2,7 @@ package com.apj.projects.coconut.utils;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.net.URL;
 import java.util.Properties;
 
 import org.slf4j.Logger;
@@ -22,12 +23,17 @@ public class PropertyManager {
 
 	private static void loadProps() {
 
-		String classPathFile = Thread.currentThread().getContextClassLoader().getResource(FILE_NAME).getPath();
+		URL classPathURL = Thread.currentThread().getContextClassLoader().getResource(FILE_NAME);
 
-		try {
-			coconutProps.load(new FileInputStream(classPathFile));
-		} catch (IOException e) {
-			logger.error("PropertyManager Error", e);
+		if (classPathURL == null) {
+			throw new RuntimeException("Could not find coconut.properties in classpath");
+		} else {
+			String classPathFile = classPathURL.getPath();
+			try {
+				coconutProps.load(new FileInputStream(classPathFile));
+			} catch (IOException e) {
+				logger.error("PropertyManager Error", e);
+			}
 		}
 	}
 
@@ -50,10 +56,18 @@ public class PropertyManager {
 	public static ThreadType getThreadType() {
 		Object threadType = coconutProps.get("thread_type");
 		if (threadType == null) {
-			return ThreadType.CACHED_THREAD_POOL;
+			return ThreadType.VIRTUAL_THREAD;
 		}
 		ThreadType tt = ThreadType.valueOf((String) threadType);
 		return tt;
 	}
 
+	public static String getRestServicePackageName() {
+		Object restServicePackageName = coconutProps.get("rest_service_package_name");
+		if (restServicePackageName == null) {
+			logger.error("No rest_service_package_name defined in coconut.properties. Defaulting to com");
+			return "com";
+		}
+		return (String) restServicePackageName;
+	}
 }
