@@ -101,7 +101,7 @@ public class RequestManager implements Runnable {
 
 		HashMap<String, Pair<Object, Method>> resourceHandler = new HashMap<>();
 
-		Reflections reflections = AnnotationScanner.getReflections();
+		Reflections reflections = AnnotationScanner.getCoconutReflections();
 		// Get all handler classes (subtypes of ResourceHandler and annotated with
 		// Handler)
 		Set<Class<?>> handlerClasses = reflections.get(SubTypes.of(ResourceHandler.class).asClass()
