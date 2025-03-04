@@ -36,6 +36,7 @@ import com.apj.projects.coconut.resource.rest.exceptions.RestResourceException;
 import com.apj.projects.coconut.resource.rest.exceptions.UnsupportedRestResourceMethodException;
 import com.apj.projects.coconut.utils.AnnotationScanner;
 import com.apj.projects.coconut.utils.Pair;
+import com.apj.projects.coconut.utils.PropertyManager;
 import com.apj.projects.coconut.utils.json.JSONObjectMapper;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
@@ -44,7 +45,8 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 public class RESTResourceHandler extends ResourceHandler {
 
 	private static Logger logger = LoggerFactory.getLogger(RequestManager.class);
-	private static Reflections reflections = AnnotationScanner.getReflections();
+	private static Reflections reflections = AnnotationScanner
+			.getRestReflections(PropertyManager.getRestServicePackageName());
 
 	private Set<Class<?>> restResourcesClasses;
 	private HashMap<String, RESTResourceMetadata> restResourcesDataMap;
