@@ -100,38 +100,4 @@ public class RESTResourceMetadata {
 		}
 	}
 
-//	private void mapRequestMethodsv1() {
-//
-//		requestMethodMap = new HashMap<Pair<HTTPRequestMethod, URLPath>, Method>();
-//		Method[] restResourceMethods = restResourceClass.getDeclaredMethods();
-//		// Default
-//		String path = "/";
-//		HTTPRequestMethod requestMethodType = null;
-//
-//		for (Method m : restResourceMethods) {
-//			Annotation[] annotations = m.getDeclaredAnnotations();
-//			for (Annotation annotation : annotations) {
-//				if (annotation instanceof GET) {
-//					requestMethodType = HTTPRequestMethod.GET;
-//				} else if (annotation instanceof POST) {
-//					requestMethodType = HTTPRequestMethod.POST;
-//				} else if (annotation instanceof DELETE) {
-//					requestMethodType = HTTPRequestMethod.DELETE;
-//				} else if (annotation instanceof PUT) {
-//					requestMethodType = HTTPRequestMethod.PUT;
-//				} else if (annotation instanceof Path) {
-//					path = "/rest/" + restResourceName + "/" + ((Path) annotation).value();
-//				}
-//			}
-//			if (path != null && requestMethodType != null) {
-//				Pair<HTTPRequestMethod, URLPath> pair = new Pair<HTTPRequestMethod, URLPath>(requestMethodType,
-//						new URLPath(path));
-//
-//				if (!requestMethodMap.containsKey(pair))
-//					requestMethodMap.put(pair, m);
-//				else
-//					logger.info(pair + " already exists with the same path. Neglecting current pair");
-//			}
-//		}
-//	}
 }
