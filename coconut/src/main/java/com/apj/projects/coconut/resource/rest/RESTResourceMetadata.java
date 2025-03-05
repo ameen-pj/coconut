@@ -7,9 +7,7 @@ import java.util.HashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.apj.projects.coconut.http.URLPath;
 import com.apj.projects.coconut.http.enums.HTTPRequestMethod;
-import com.apj.projects.coconut.resource.handlers.annotations.Path;
 import com.apj.projects.coconut.resource.rest.annotations.DELETE;
 import com.apj.projects.coconut.resource.rest.annotations.GET;
 import com.apj.projects.coconut.resource.rest.annotations.POST;
@@ -19,7 +17,6 @@ import com.apj.projects.coconut.resource.rest.exceptions.RestResourceException;
 import com.apj.projects.coconut.resource.rest.exceptions.UnsupportedRestResourceMethodException;
 import com.apj.projects.coconut.util.exceptions.ObjectCreatorException;
 import com.apj.projects.coconut.utils.ObjectCreator;
-import com.apj.projects.coconut.utils.Pair;
 
 public class RESTResourceMetadata {
 
@@ -29,7 +26,7 @@ public class RESTResourceMetadata {
 	private Object restResourceObject;
 	private String restResourceName;
 
-	private HashMap<Pair<HTTPRequestMethod, URLPath>, Method> requestMethodMap;
+	private HashMap<HTTPRequestMethod, Method> requestMethodMap;
 
 	public RESTResourceMetadata(Class<?> restResourceClass) throws RestResourceException {
 
@@ -52,13 +49,13 @@ public class RESTResourceMetadata {
 		return restResourceObject;
 	}
 
-	public Method getRequestMethodByPair(Pair<HTTPRequestMethod, URLPath> pair)
+	public Method getRequestMethodByMethodType(HTTPRequestMethod httpRequestMethod)
 			throws UnsupportedRestResourceMethodException {
 
-		Method method = requestMethodMap.get(pair);
+		Method method = requestMethodMap.get(httpRequestMethod);
 		if (method == null) {
 			throw new UnsupportedRestResourceMethodException(
-					pair.getKey() + ":" + pair.getValue().getPathString() + " not implemented");
+					httpRequestMethod + " not implemented for " + getRestResourceName());
 		}
 		return method;
 	}
@@ -77,10 +74,8 @@ public class RESTResourceMetadata {
 
 	private void mapRequestMethods() {
 
-		requestMethodMap = new HashMap<Pair<HTTPRequestMethod, URLPath>, Method>();
+		requestMethodMap = new HashMap<HTTPRequestMethod, Method>();
 		Method[] restResourceMethods = restResourceClass.getDeclaredMethods();
-		// Default
-		String path = "/";
 		HTTPRequestMethod requestMethodType = null;
 
 		for (Method m : restResourceMethods) {
@@ -94,18 +89,13 @@ public class RESTResourceMetadata {
 					requestMethodType = HTTPRequestMethod.DELETE;
 				} else if (annotation instanceof PUT) {
 					requestMethodType = HTTPRequestMethod.PUT;
-				} else if (annotation instanceof Path) {
-					path = "/rest/" + restResourceName + "/" + ((Path) annotation).value();
 				}
 			}
-			if (path != null && requestMethodType != null) {
-				Pair<HTTPRequestMethod, URLPath> pair = new Pair<HTTPRequestMethod, URLPath>(requestMethodType,
-						new URLPath(path));
-
-				if (!requestMethodMap.containsKey(pair))
-					requestMethodMap.put(pair, m);
+			if (requestMethodType != null) {
+				if (!requestMethodMap.containsKey(requestMethodType))
+					requestMethodMap.put(requestMethodType, m);
 				else
-					logger.info(pair + " already exists with the same path. Neglecting current pair");
+					logger.info(requestMethodType + " already exists for the resource " + getRestResourceName());
 			}
 		}
 	}
