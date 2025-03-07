@@ -23,15 +23,14 @@ import com.apj.projects.coconut.http.URLPathMetadataExtractor;
 import com.apj.projects.coconut.http.enums.HTTPContentTypes;
 import com.apj.projects.coconut.http.enums.HTTPRequestMethod;
 import com.apj.projects.coconut.http.enums.HTTPStatusCode;
-import com.apj.projects.coconut.http.exceptions.BadHTTPRequestException;
 import com.apj.projects.coconut.resource.annotations.QueryParams;
 import com.apj.projects.coconut.resource.annotations.RequestBody;
 import com.apj.projects.coconut.resource.handlers.annotations.Handler;
 import com.apj.projects.coconut.resource.handlers.exceptions.GeneralServerException;
 import com.apj.projects.coconut.resource.rest.RESTResourceMetadata;
-import com.apj.projects.coconut.resource.rest.annotations.Consumes;
 import com.apj.projects.coconut.resource.rest.annotations.Produces;
 import com.apj.projects.coconut.resource.rest.annotations.RESTResourceMapping;
+import com.apj.projects.coconut.resource.rest.exceptions.BadRESTResourceException;
 import com.apj.projects.coconut.resource.rest.exceptions.BadRESTResourceMethodException;
 import com.apj.projects.coconut.resource.rest.exceptions.RestResourceException;
 import com.apj.projects.coconut.resource.rest.exceptions.UnsupportedRestResourceMethodException;
@@ -39,7 +38,7 @@ import com.apj.projects.coconut.utils.AnnotationScanner;
 import com.apj.projects.coconut.utils.PropertyManager;
 import com.apj.projects.coconut.utils.json.JSONObjectMapper;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 
 @Handler("rest")
 public class RESTResourceHandler extends ResourceHandler {
@@ -66,83 +65,87 @@ public class RESTResourceHandler extends ResourceHandler {
 	}
 
 	public void resourceMethodHandler(String resourceName, HTTPRequest request, HTTPResponse response)
-			throws UnsupportedRestResourceMethodException, GeneralServerException, BadHTTPRequestException,
-			BadRESTResourceMethodException {
+			throws GeneralServerException, BadRESTResourceMethodException, UnsupportedRestResourceMethodException {
 
 		HTTPRequestMethod httpRequestMethod = request.getHTTPRequestMethod();
-		Method resourceMethod = restResourcesDataMap.get(resourceName).getRequestMethodByMethodType(httpRequestMethod);
+		ArrayList<Method> resourceMethods = restResourcesDataMap.get(resourceName).getRequestMethodByRequest(request);
+
 		Object resourceObject = restResourcesDataMap.get(resourceName).getRestResourceObject();
 
-		try {
-
-			// Getting method annotations
-			Annotation consumesAnnotation = resourceMethod.getDeclaredAnnotation(Consumes.class);
-			Annotation producesAnnotation = resourceMethod.getDeclaredAnnotation(Produces.class);
-
-			Parameter[] resourceMethodParams = resourceMethod.getParameters();
-			ArrayList<Object> methodArgs = new ArrayList<Object>();
-
-			// URL Query Params
-			String queryParamString = request.getQueryParamString();
-			HashMap<String, Object> requestQueryParams = new HashMap<String, Object>();
-			if (queryParamString != null) {
-				requestQueryParams = URLPath.getQueryParams(queryParamString);
+		// URL Query Parameters
+		boolean isQueryParamsPresent = false;
+		String queryParamString = request.getQueryParamString();
+		HashMap<String, Object> requestQueryParams = new HashMap<String, Object>();
+		if (queryParamString != null) {
+			requestQueryParams = URLPath.getQueryParams(queryParamString);
+			isQueryParamsPresent = true;
+		}
+		// Request Body [ONLY FOR JSON NOW]
+		boolean isRequestBodyPresent = false;
+		Optional<?> body = request.getBody();
+		HashMap<Object, Object> object = null;
+		if (body.isPresent()) {
+			String jsonString = body.get().toString();
+			try {
+				object = JSONObjectMapper.getMapper().readValue(jsonString,
+						new TypeReference<HashMap<Object, Object>>() {
+						});
+			} catch (JsonProcessingException e) {
+				throw new GeneralServerException(e.getMessage());
 			}
+			isRequestBodyPresent = true;
+		}
 
-			for (Parameter resourceMethodParam : resourceMethodParams) {
+		// Finding the appropriate requestMethod
+		Method requestMethod = null;
+		ArrayList<Object> methodArgs = new ArrayList<Object>();
 
-				Annotation[] paramAnnotations = resourceMethodParam.getDeclaredAnnotations();
+		for (Method resourceMethod : resourceMethods) {
+			Parameter[] resourceMethodParameters = resourceMethod.getParameters();
+			int parameterMatchCount = 0;
 
-				for (Annotation paramAnnotation : paramAnnotations) {
-
-					if (paramAnnotation instanceof QueryParams) {
-
-						String query = ((QueryParams) paramAnnotation).value();
-						Object value = requestQueryParams.get(query);
-						// NOTE: passes null if the value is note present
-						methodArgs.add(value);
-
-					} else if (paramAnnotation instanceof RequestBody) {
-						Optional<?> body = request.getBody();
-						if (consumesAnnotation != null) {
-							HTTPContentTypes consumesContentType = ((Consumes) consumesAnnotation).value();
-							// Processing JSON body
-							if (consumesContentType == HTTPContentTypes.APPLICATION_JSON) {
-								String jsonString = "";
-								if (body.isPresent()) {
-									jsonString = request.getBody().get().toString();
-								}
-								try {
-									Object obj = JSONObjectMapper.getMapper().readValue(jsonString,
-											resourceMethodParam.getType());
-									methodArgs.add(obj);
-								} catch (JsonMappingException e) {
-									e.printStackTrace();
-									throw new GeneralServerException(e.getMessage());
-								} catch (JsonProcessingException e) {
-									e.printStackTrace();
-									throw new GeneralServerException(e.getMessage());
-								}
-							} else {
-								throw new GeneralServerException(
-										consumesContentType + " not implemented for this handler");
-							}
-						} else {
-							throw new BadRESTResourceMethodException("No @consumes annotation present");
+			for (Parameter resourceMethodParameter : resourceMethodParameters) {
+				Annotation[] parameterAnnotations = resourceMethodParameter.getDeclaredAnnotations();
+				for (Annotation parameterAnnotation : parameterAnnotations) {
+					// if parameter key matches query string
+					if (parameterAnnotation instanceof QueryParams && isQueryParamsPresent) {
+						String queryParamKey = ((QueryParams) parameterAnnotation).value();
+						if (requestQueryParams.keySet().contains(queryParamKey)) {
+							methodArgs.add(requestQueryParams.get(((QueryParams) parameterAnnotation).value()));
+							parameterMatchCount++;
 						}
+					}
+					// Request Body
+					else if (parameterAnnotation instanceof RequestBody && isRequestBodyPresent) {
+						methodArgs.add(object);
+						parameterMatchCount++;
 					}
 				}
 			}
-			// Invoking the method and returning the value
-			Optional<?> returnValue = Optional.ofNullable(resourceMethod.invoke(resourceObject, methodArgs.toArray()));
+			if (parameterMatchCount == resourceMethodParameters.length) {
+				requestMethod = resourceMethod;
+				break;
+			} else {
+				methodArgs.clear();
+			}
+		}
+		// Invoking the method and returning the value
+		try {
+			Optional<?> returnValue = Optional.ofNullable(requestMethod.invoke(resourceObject, methodArgs.toArray()));
+			Annotation producesAnnotation = requestMethod.getDeclaredAnnotation(Produces.class);
 
 			if (returnValue.isPresent()) {
 				if (producesAnnotation != null) {
 					HTTPContentTypes producesContentType = ((Produces) producesAnnotation).value();
 					// Return JSON Response
 					if (producesContentType == HTTPContentTypes.APPLICATION_JSON) {
-						String json = JSONObjectMapper.getMapper().writeValueAsString(returnValue.get());
-						response.setBody(new HTTPBody(json)).setContentType(HTTPContentTypes.APPLICATION_JSON);
+						String json;
+						try {
+							json = JSONObjectMapper.getMapper().writeValueAsString(returnValue.get());
+							response.setBody(new HTTPBody(json)).setContentType(HTTPContentTypes.APPLICATION_JSON);
+						} catch (JsonProcessingException e) {
+							throw new GeneralServerException(e.getMessage());
+						}
 					} else if (producesContentType == HTTPContentTypes.TEXT_PLAIN) {
 						response.setBody(new HTTPBody((String) returnValue.get()))
 								.setContentType(HTTPContentTypes.TEXT_PLAIN);
@@ -152,7 +155,7 @@ public class RESTResourceHandler extends ResourceHandler {
 				} else {
 					throw new BadRESTResourceMethodException("No @produces annotation present");
 				}
-
+				// Setting appropriate status codes
 				switch (httpRequestMethod) {
 				case GET:
 					response.setStatus(HTTPStatusCode.OK);
@@ -172,12 +175,11 @@ public class RESTResourceHandler extends ResourceHandler {
 			} else {
 				response.setStatus(HTTPStatusCode.OK);
 			}
-		} catch (InvocationTargetException e) {
-			throw new GeneralServerException(e.getCause().getMessage());
-		} catch (IllegalAccessException | JsonProcessingException e) {
+		} catch (IllegalAccessException e) {
 			throw new GeneralServerException(e.getMessage());
+		} catch (InvocationTargetException e) {
+			throw new BadRESTResourceException(e.getCause().getMessage());
 		}
-
 	}
 
 	@Override
@@ -195,9 +197,6 @@ public class RESTResourceHandler extends ResourceHandler {
 				} catch (GeneralServerException | BadRESTResourceMethodException e) {
 					response.setStatus(HTTPStatusCode.INTERNAL_SERVER_ERROR).setBody(new HTTPBody(e.getMessage()));
 					logger.error("GeneralServerException | BadRESTResourceMethodException", e);
-				} catch (BadHTTPRequestException e) {
-					response.setStatus(HTTPStatusCode.BAD_REQUEST).setBody(new HTTPBody(e.getMessage()));
-					logger.error("BadHTTPRequestException", e);
 				}
 			} else {
 				response.setStatus(HTTPStatusCode.NOT_FOUND).setBody(new HTTPBody("Resource could not be found"));

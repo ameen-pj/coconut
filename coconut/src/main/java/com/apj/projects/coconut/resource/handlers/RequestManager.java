@@ -73,13 +73,10 @@ public class RequestManager implements Runnable {
 			try {
 				invokeMethod.invoke(handlerObject, request, response);
 			} catch (IllegalAccessException e) {
-				e.printStackTrace();
 				throw new GeneralServerException(e.getMessage());
 			} catch (InvocationTargetException e) {
-				e.printStackTrace();
-				throw new GeneralServerException(e.getMessage());
+				throw new GeneralServerException(e.getCause().getMessage());
 			}
-
 		} else {
 			throw new ResourceHandlerNotImplementedException(resourceType + " handler is not yet implemented");
 		}
@@ -87,7 +84,6 @@ public class RequestManager implements Runnable {
 	}
 
 	private void closeConnection() {
-
 		if (!socket.isClosed()) {
 			try {
 				socket.close();
@@ -125,10 +121,8 @@ public class RequestManager implements Runnable {
 					| InvocationTargetException e) {
 				logger.error("Could not create " + resourceType + "handler object", e);
 			}
-
 		}
 		return resourceHandler;
-
 	}
 
 	@Override

@@ -7,13 +7,10 @@ import com.apj.projects.coconut.util.exceptions.ObjectCreatorException;
 
 public class ObjectCreator {
 
-	private Class<?> classType;
 	private Constructor<?> constructor;
 	private Object obj;
 
 	public ObjectCreator(Class<?> classType, Class<?>... constructorArgTypes) throws ObjectCreatorException {
-
-		this.classType = classType;
 
 		try {
 			constructor = classType.getDeclaredConstructor(constructorArgTypes);
