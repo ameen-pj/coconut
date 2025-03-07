@@ -60,13 +60,42 @@ public class RESTResourceMetadata {
 		return method;
 	}
 
+	private String getQualifiedRestResourceName() {
+		StringBuffer resourceName = new StringBuffer();
+		Class<?> currentClass = restResourceClass;
+		while (true) {
+			Annotation ann = currentClass.getAnnotation(RESTResourceMapping.class);
+			if (ann != null) {
+				String name = ((RESTResourceMapping) ann).value();
+				resourceName.insert(0, "/" + (name == null ? currentClass.getName() : name));
+				if (currentClass.isMemberClass()) {
+					currentClass = currentClass.getEnclosingClass();
+				} else {
+					break;
+				}
+			} else {
+				break;
+			}
+		}
+		resourceName.deleteCharAt(0); // remove first
+		return resourceName.toString();
+	}
+
 	private void createResourceObject() throws RestResourceException {
 		// Initializing restResource object
 		try {
-			restResourceObject = new ObjectCreator(restResourceClass).createObject();
-			// Setting name
-			String name = restResourceClass.getAnnotation(RESTResourceMapping.class).value();
-			restResourceName = name == null ? restResourceClass.getName() : name;
+			if (restResourceClass.isMemberClass()) {
+
+				Class<?> enclosingClass = restResourceClass.getEnclosingClass();
+				Object enclosingClassObj = new ObjectCreator(enclosingClass).createObject();
+				restResourceObject = new ObjectCreator(restResourceClass, enclosingClass)
+						.createObject(enclosingClassObj);
+				restResourceName = getQualifiedRestResourceName();
+			} else {
+				restResourceObject = new ObjectCreator(restResourceClass).createObject();
+				restResourceName = getQualifiedRestResourceName();
+			}
+
 		} catch (ObjectCreatorException e) {
 			throw new RestResourceException("Could not create restResource object : " + e.getMessage());
 		}
