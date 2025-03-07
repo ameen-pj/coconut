@@ -19,6 +19,7 @@ import com.apj.projects.coconut.http.HTTPBody;
 import com.apj.projects.coconut.http.HTTPRequest;
 import com.apj.projects.coconut.http.HTTPResponse;
 import com.apj.projects.coconut.http.URLPath;
+import com.apj.projects.coconut.http.URLPathMetadataExtractor;
 import com.apj.projects.coconut.http.enums.HTTPContentTypes;
 import com.apj.projects.coconut.http.enums.HTTPRequestMethod;
 import com.apj.projects.coconut.http.enums.HTTPStatusCode;
@@ -156,29 +157,24 @@ public class RESTResourceHandler extends ResourceHandler {
 				case GET:
 					response.setStatus(HTTPStatusCode.OK);
 					break;
-
 				case POST:
 					response.setStatus(HTTPStatusCode.CREATED);
 					break;
-
 				case DELETE:
 					response.setStatus(HTTPStatusCode.OK);
 					break;
-
 				case PUT:
 					response.setStatus(HTTPStatusCode.OK);
-
 				default:
 					response.setStatus(HTTPStatusCode.OK);
 					break;
 				}
-
 			} else {
 				response.setStatus(HTTPStatusCode.OK);
 			}
-
-		} catch (IllegalAccessException | InvocationTargetException | JsonProcessingException e) {
-			e.printStackTrace();
+		} catch (InvocationTargetException e) {
+			throw new GeneralServerException(e.getCause().getMessage());
+		} catch (IllegalAccessException | JsonProcessingException e) {
 			throw new GeneralServerException(e.getMessage());
 		}
 
@@ -187,7 +183,7 @@ public class RESTResourceHandler extends ResourceHandler {
 	@Override
 	public void handle(HTTPRequest request, HTTPResponse response) throws Exception {
 
-		String resourceName = request.getHTTPURLPath().getPathPartByIndex(1);
+		String resourceName = URLPathMetadataExtractor.getResourcePath(request.getHTTPURLPath());
 
 		if (resourceName != null) {
 			if (restResourcesDataMap.containsKey(resourceName)) {
