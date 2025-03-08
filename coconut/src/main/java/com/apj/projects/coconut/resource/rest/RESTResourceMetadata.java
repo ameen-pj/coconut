@@ -24,6 +24,7 @@ public class RESTResourceMetadata {
 	private String restResourceName;
 
 	private HashMap<HTTPRequestMethod, ArrayList<Method>> requestMethodMap;
+	private HashMap<Method, RESTResourceMethodMetadata> requestMethodMetadataMap;
 
 	public RESTResourceMetadata(Class<?> restResourceClass) throws RestResourceException {
 
@@ -42,6 +43,10 @@ public class RESTResourceMetadata {
 
 	public Object getRestResourceObject() {
 		return restResourceObject;
+	}
+
+	public RESTResourceMethodMetadata getRestResourceMethodMetadataByMethod(Method method) {
+		return requestMethodMetadataMap.get(method);
 	}
 
 	public ArrayList<Method> getRequestMethodByRequest(HTTPRequest request)
@@ -80,6 +85,7 @@ public class RESTResourceMetadata {
 	private void mapRequestMethods() {
 
 		requestMethodMap = new HashMap<HTTPRequestMethod, ArrayList<Method>>();
+		requestMethodMetadataMap = new HashMap<Method, RESTResourceMethodMetadata>();
 		Method[] restResourceMethods = restResourceClass.getDeclaredMethods();
 		HTTPRequestMethod requestMethodType = null;
 
@@ -98,9 +104,11 @@ public class RESTResourceMetadata {
 			}
 			if (requestMethodType != null) {
 				ArrayList<Method> methods = requestMethodMap.getOrDefault(requestMethodType, new ArrayList<Method>());
+				requestMethodMetadataMap.put(m, new RESTResourceMethodMetadata(m));
 				methods.add(m);
-				if (methods.size() <= 1)
+				if (methods.size() <= 1) {
 					requestMethodMap.put(requestMethodType, methods);
+				}
 			}
 		}
 	}
