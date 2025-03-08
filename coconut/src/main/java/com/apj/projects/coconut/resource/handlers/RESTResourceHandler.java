@@ -137,9 +137,13 @@ public class RESTResourceHandler extends ResourceHandler {
 						if (bodyType == HTTPContentTypes.APPLICATION_JSON) {
 							HashMap<Object, Object> body;
 							try {
-								body = request.getBody();
-								methodArgs.add(body);
-								parameterMatchCount++;
+								Object objBody = request.getBody(HTTPContentTypes.APPLICATION_JSON);
+								if (objBody instanceof HashMap<?, ?>) {
+									body = (HashMap<Object, Object>) objBody;
+									methodArgs.add(body);
+									parameterMatchCount++;
+								}
+
 							} catch (JsonProcessingException e) {
 								throw new GeneralServerException(e.getMessage());
 							}
