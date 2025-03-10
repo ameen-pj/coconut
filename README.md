@@ -3,11 +3,11 @@
 _Lightweight REST Resource Server leveraging the latest Java 21 Virtual Threads._ 
 
 ## Key Features ✨
-- REST
-- JSON support
-- Write your Service and Resource classes with minimum configuration.
-- Supports multiple threading models (Java Virtual Threads, Cached Thread Pool , Fixed Threadpool)
-- Annotation based.
+- Support for multiple threading models (Virtual Threads, Fixed Thread pool and Cached Thread pool)
+- RESTful architecture
+- JSON Support
+- Minimal configuration for service and resource classes.
+- Utilization of  Java annotations to eliminate tedious XML configurations.
 
 ## **Installation** ⬇️
 
@@ -49,94 +49,140 @@ public class SchoolServer {
 	}
 }
 ```
-3. Create your Resource class with appropriate getter and setter methods *"Teacher.java"*
+3. Create your Resource class with appropriate getter and setter methods *"Student.java"*
 ```
 package school;
 
-public class Teacher {
+public class Student {
 
+	private int id;
 	private String name;
-	private String subject;
+	private int grade;
+	private char division;
 
-	public Teacher() {
+	public Student() {
 
 	}
 
-	public Teacher(String name, String subject) {
-		this.name = name;
-		this.subject = subject;
+	public Student(int id, String name, int grade, char division) {
+
+		this.setId(id);
+		this.setName(name);
+		this.setGrade(grade);
+		this.setDivision(division);
+
+	}
+
+	public int getId() {
+		return id;
+	}
+
+	public void setId(int id) {
+		this.id = id;
+	}
+
+	public String getName() {
+		return name;
 	}
 
 	public void setName(String name) {
 		this.name = name;
 	}
 
-	public void setSubject(String subject) {
-		this.subject = subject;
+	public int getGrade() {
+		return grade;
 	}
 
-	public String getName() {
-		return this.name;
+	public void setGrade(int grade) {
+		this.grade = grade;
 	}
 
-	public String getSubject() {
-		return this.subject;
+	public char getDivision() {
+		return division;
+	}
+
+	public void setDivision(char division) {
+		this.division = division;
+	}
+
+	public String toString() {
+		return id + ": " + name + " | " + grade + "-" + division;
 	}
 
 }
-
 ```
-4. Create your service class *"TeacherService.java"*
+4. Create your service class *"StudentResource.java"*
 ```
 package school;
 
-import java.util.HashMap;
+import java.util.Arrays;
 
 import com.apj.projects.coconut.http.enums.HTTPContentTypes;
 import com.apj.projects.coconut.resource.annotations.QueryParams;
 import com.apj.projects.coconut.resource.annotations.RequestBody;
-import com.apj.projects.coconut.resource.handlers.annotations.Path;
-import com.apj.projects.coconut.resource.rest.annotations.Consumes;
+import com.apj.projects.coconut.resource.rest.annotations.DELETE;
 import com.apj.projects.coconut.resource.rest.annotations.GET;
 import com.apj.projects.coconut.resource.rest.annotations.POST;
 import com.apj.projects.coconut.resource.rest.annotations.Produces;
 import com.apj.projects.coconut.resource.rest.annotations.RESTResourceMapping;
 
-@RESTResourceMapping("teacher")
-public class TeacherService {
+@RESTResourceMapping("student")
+public class StudentResource {
 
-	@Path("/")
 	@GET
 	@Produces(HTTPContentTypes.APPLICATION_JSON)
-	public Teacher[] getAllTeachers() {
+	public Student[] getAllStudents() {
+		return new Student[] { new Student(1, "Mary Jane", 10, 'A'), new Student(2, "John Doe", 8, 'E'),
+				new Student(3, "Ameen PJ", 12, 'A')
 
-		return new Teacher[] { new Teacher("John Doe", "Maths"), new Teacher("Adam Morris", "English") };
+		};
 	}
 
-	@Path("/getBySubject")
 	@GET
 	@Produces(HTTPContentTypes.APPLICATION_JSON)
-	public Teacher getTeacherById(@QueryParams("subject") String subject) {
-		return new Teacher("Mr Armstrong", subject);
+	public Student getStudentById(@QueryParams("id") int id) {
+		return new Student(id, "Ameen PJ", 12, 'A');
 	}
 
-	@Path("/addTeacher")
 	@POST
-	@Consumes(HTTPContentTypes.APPLICATION_JSON)
-	@Produces(HTTPContentTypes.APPLICATION_JSON)
-	public HashMap<String, Teacher> addTeacher(@RequestBody Teacher teacher) {
-		HashMap<String, Teacher> map = new HashMap<String, Teacher>();
-		map.put("Teacher", teacher);
-		return map;
+	@Produces(HTTPContentTypes.TEXT_PLAIN)
+	public String addStudent(@RequestBody Student student) {
+		return student.toString() + " created";
+	}
+
+	@POST
+	@Produces(HTTPContentTypes.TEXT_PLAIN)
+	public String addStudents(@RequestBody Student[] students) {
+		return Arrays.toString(students) + " created";
+	}
+
+	@DELETE
+	@Produces(HTTPContentTypes.TEXT_PLAIN)
+	public String deleteStudent(@QueryParams("id") int id) {
+		return "deleted student with id: " + id;
 	}
 
 }
 ```
 5. Run *"SchoolServer.java"*
-![image](https://github.com/user-attachments/assets/4f1a1f13-5f0c-49a1-b314-d3016c5d86a7)
-![image](https://github.com/user-attachments/assets/b2c5856e-7ffc-4ab8-9db5-3974edbbe683)
-![image](https://github.com/user-attachments/assets/584a033f-cafe-4c41-bb83-2deabf767435)
-![image](https://github.com/user-attachments/assets/b4371431-b1d3-41db-956f-ccc8ef8ee6a1)
+### Console
+![image](https://github.com/user-attachments/assets/61dd125f-800e-449e-9b03-8f4e9088fefc)
+### Get All Students
+![image](https://github.com/user-attachments/assets/e0cf4f1e-4214-43a7-b25c-fb7a4ea1bc2a)
+### Get Student by ID
+![image](https://github.com/user-attachments/assets/16c2da1f-1c1c-425b-a732-e632b503950c)
+### Add Student
+![image](https://github.com/user-attachments/assets/f7794f04-8775-48c0-a0cd-d72b07d66cd1)
+### Add Students
+![image](https://github.com/user-attachments/assets/617c552e-a1c3-42dd-9a6f-d07f30e023d9)
+### Delete Student by ID
+![image](https://github.com/user-attachments/assets/eac9413c-72f4-431f-a938-af90e87489d9)
+
+
+
+
+
+
 
 
 

@@ -2,11 +2,10 @@ package com.apj.projects.coconut.resource.rest;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.HashMap;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+import com.apj.projects.coconut.http.HTTPRequest;
 import com.apj.projects.coconut.http.enums.HTTPRequestMethod;
 import com.apj.projects.coconut.resource.rest.annotations.DELETE;
 import com.apj.projects.coconut.resource.rest.annotations.GET;
@@ -20,21 +19,18 @@ import com.apj.projects.coconut.utils.ObjectCreator;
 
 public class RESTResourceMetadata {
 
-	private static Logger logger = LoggerFactory.getLogger(RESTResourceMetadata.class);
-
 	private Class<?> restResourceClass;
 	private Object restResourceObject;
 	private String restResourceName;
 
-	private HashMap<HTTPRequestMethod, Method> requestMethodMap;
+	private HashMap<HTTPRequestMethod, ArrayList<Method>> requestMethodMap;
+	private HashMap<Method, RESTResourceMethodMetadata> requestMethodMetadataMap;
 
 	public RESTResourceMetadata(Class<?> restResourceClass) throws RestResourceException {
 
 		this.restResourceClass = restResourceClass;
-
 		createResourceObject();
 		mapRequestMethods();
-
 	}
 
 	public String getRestResourceName() {
@@ -49,53 +45,38 @@ public class RESTResourceMetadata {
 		return restResourceObject;
 	}
 
-	public Method getRequestMethodByMethodType(HTTPRequestMethod httpRequestMethod)
+	public RESTResourceMethodMetadata getRestResourceMethodMetadataByMethod(Method method) {
+		return requestMethodMetadataMap.get(method);
+	}
+
+	public ArrayList<Method> getRequestMethodByRequest(HTTPRequest request)
 			throws UnsupportedRestResourceMethodException {
 
-		Method method = requestMethodMap.get(httpRequestMethod);
-		if (method == null) {
+		HTTPRequestMethod requestMethodType = request.getHTTPRequestMethod();
+		ArrayList<Method> resourceMethods = requestMethodMap.get(requestMethodType);
+		if (resourceMethods.size() == 0) {
 			throw new UnsupportedRestResourceMethodException(
-					httpRequestMethod + " not implemented for " + getRestResourceName());
+					requestMethodType + " not implemented for " + getRestResourceName());
 		}
-		return method;
+		return resourceMethods;
 	}
 
 	private String getQualifiedRestResourceName() {
-		StringBuffer resourceName = new StringBuffer();
+		String resourceName = "";
 		Class<?> currentClass = restResourceClass;
-		while (true) {
-			Annotation ann = currentClass.getAnnotation(RESTResourceMapping.class);
-			if (ann != null) {
-				String name = ((RESTResourceMapping) ann).value();
-				resourceName.insert(0, "/" + (name == null ? currentClass.getName() : name));
-				if (currentClass.isMemberClass()) {
-					currentClass = currentClass.getEnclosingClass();
-				} else {
-					break;
-				}
-			} else {
-				break;
-			}
+		Annotation ann = currentClass.getAnnotation(RESTResourceMapping.class);
+		if (ann != null) {
+			String name = ((RESTResourceMapping) ann).value();
+			resourceName = (name == null ? currentClass.getName() : name);
 		}
-		resourceName.deleteCharAt(0); // remove first
-		return resourceName.toString();
+		return resourceName;
 	}
 
 	private void createResourceObject() throws RestResourceException {
 		// Initializing restResource object
 		try {
-			if (restResourceClass.isMemberClass()) {
-
-				Class<?> enclosingClass = restResourceClass.getEnclosingClass();
-				Object enclosingClassObj = new ObjectCreator(enclosingClass).createObject();
-				restResourceObject = new ObjectCreator(restResourceClass, enclosingClass)
-						.createObject(enclosingClassObj);
-				restResourceName = getQualifiedRestResourceName();
-			} else {
-				restResourceObject = new ObjectCreator(restResourceClass).createObject();
-				restResourceName = getQualifiedRestResourceName();
-			}
-
+			restResourceObject = new ObjectCreator(restResourceClass).createObject();
+			restResourceName = getQualifiedRestResourceName();
 		} catch (ObjectCreatorException e) {
 			throw new RestResourceException("Could not create restResource object : " + e.getMessage());
 		}
@@ -103,7 +84,8 @@ public class RESTResourceMetadata {
 
 	private void mapRequestMethods() {
 
-		requestMethodMap = new HashMap<HTTPRequestMethod, Method>();
+		requestMethodMap = new HashMap<HTTPRequestMethod, ArrayList<Method>>();
+		requestMethodMetadataMap = new HashMap<Method, RESTResourceMethodMetadata>();
 		Method[] restResourceMethods = restResourceClass.getDeclaredMethods();
 		HTTPRequestMethod requestMethodType = null;
 
@@ -121,10 +103,12 @@ public class RESTResourceMetadata {
 				}
 			}
 			if (requestMethodType != null) {
-				if (!requestMethodMap.containsKey(requestMethodType))
-					requestMethodMap.put(requestMethodType, m);
-				else
-					logger.info(requestMethodType + " already exists for the resource " + getRestResourceName());
+				ArrayList<Method> methods = requestMethodMap.getOrDefault(requestMethodType, new ArrayList<Method>());
+				requestMethodMetadataMap.put(m, new RESTResourceMethodMetadata(m));
+				methods.add(m);
+				if (methods.size() <= 1) {
+					requestMethodMap.put(requestMethodType, methods);
+				}
 			}
 		}
 	}
