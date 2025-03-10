@@ -1,6 +1,6 @@
 # Coconut 🥥
 
-_Lightweight REST Resource Server leveraging the latest Java 21 Virtual Threads._ 
+_Lightweight REST Resource Server written in Java, leveraging the latest Java 21 Virtual Threads._ 
 
 ## Key Features ✨
 - Support for multiple threading models (Virtual Threads, Fixed Thread pool and Cached Thread pool)
