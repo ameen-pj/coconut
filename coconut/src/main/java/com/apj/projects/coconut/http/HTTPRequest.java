@@ -1,6 +1,5 @@
 package com.apj.projects.coconut.http;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -11,7 +10,6 @@ import com.apj.projects.coconut.http.enums.HTTPVersion;
 import com.apj.projects.coconut.http.exceptions.BadHTTPHeadersException;
 import com.apj.projects.coconut.utils.json.JSONObjectMapper;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
 
 public class HTTPRequest {
@@ -77,14 +75,13 @@ public class HTTPRequest {
 
 	}
 
-	public Object getBody(HTTPContentTypes contentType) throws JsonMappingException, JsonProcessingException {
+	public Object getBody(Class<?> bodyClassType, HTTPContentTypes contentType)
+			throws JsonMappingException, JsonProcessingException {
 		Object object = null;
 		if (body.isPresent()) {
 			if (contentType == HTTPContentTypes.APPLICATION_JSON) {
 				String jsonString = body.get().toString();
-				object = JSONObjectMapper.getMapper().readValue(jsonString,
-						new TypeReference<HashMap<Object, Object>>() {
-						});
+				object = JSONObjectMapper.getMapper().readValue(jsonString, bodyClassType);
 			}
 		}
 		return object;

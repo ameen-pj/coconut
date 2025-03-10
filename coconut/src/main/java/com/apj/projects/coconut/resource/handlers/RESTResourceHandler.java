@@ -67,9 +67,9 @@ public class RESTResourceHandler extends ResourceHandler {
 		return reflections.get(TypesAnnotated.with(RESTResourceMapping.class).asClass());
 	}
 
+	@SuppressWarnings("null")
 	public void resourceMethodHandler(String resourceName, HTTPRequest request, HTTPResponse response)
-			throws GeneralServerException, BadRESTResourceMethodException, UnsupportedRestResourceMethodException,
-			BadHTTPRequestException {
+			throws Exception {
 
 		HTTPRequestMethod httpRequestMethod = request.getHTTPRequestMethod();
 		RESTResourceMetadata restResourceMetadata = restResourcesDataMap.get(resourceName);
@@ -108,6 +108,9 @@ public class RESTResourceHandler extends ResourceHandler {
 		Method requestMethod = null;
 		ArrayList<Object> methodArgs = new ArrayList<Object>();
 
+		// Any Exceptions
+		Exception exception = null;
+
 		for (Method resourceMethod : resourceMethods) {
 			RESTResourceMethodMetadata restResourceMethodMetadata = restResourceMetadata
 					.getRestResourceMethodMetadataByMethod(resourceMethod);
@@ -135,17 +138,15 @@ public class RESTResourceHandler extends ResourceHandler {
 					else if (parameterAnnotation instanceof RequestBody && isRequestBodyPresent) {
 
 						if (bodyType == HTTPContentTypes.APPLICATION_JSON) {
-							HashMap<Object, Object> body;
+							Object body;
 							try {
-								Object objBody = request.getBody(HTTPContentTypes.APPLICATION_JSON);
-								if (objBody instanceof HashMap<?, ?>) {
-									body = (HashMap<Object, Object>) objBody;
-									methodArgs.add(body);
-									parameterMatchCount++;
-								}
+								body = request.getBody(resourceMethodParameters[i].getType(),
+										HTTPContentTypes.APPLICATION_JSON);
+								methodArgs.add(body);
+								parameterMatchCount++;
 
 							} catch (JsonProcessingException e) {
-								throw new GeneralServerException(e.getMessage());
+								exception = new GeneralServerException(e.getMessage());
 							}
 						} else {
 							throw new BadHTTPRequestException(bodyType + " not supported/");
@@ -162,7 +163,9 @@ public class RESTResourceHandler extends ResourceHandler {
 			}
 
 		}
-		if (requestMethod != null) {
+		if (requestMethod != null)
+
+		{
 			// Invoking the method and returning the value
 			try {
 				Optional<?> returnValue = Optional
@@ -215,8 +218,10 @@ public class RESTResourceHandler extends ResourceHandler {
 			} catch (InvocationTargetException e) {
 				throw new BadRESTResourceException(e.getCause().getMessage());
 			}
-		} else {
+		} else if (requestMethod == null && exception == null) {
 			throw new BadHTTPRequestException("Could not find restResourceHandler method with appropriate parameters");
+		} else {
+			throw exception;
 		}
 
 	}
